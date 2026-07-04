@@ -1,0 +1,50 @@
+@model Midix.Models.ViewModels.PharmacyIndexViewModel
+@{
+    ViewData["Title"] = "Nearby Pharmacies";
+}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="~/css/pharmacy.css" />
+
+<section class="pharmacy-hero">
+    <a class="back-link" asp-controller="Home" asp-action="Index">&larr; Back</a>
+    <h1>Nearby Pharmacies</h1>
+    <p>Find pharmacies close to your current location</p>
+</section>
+
+<div class="pharmacy-layout">
+    <aside class="pharmacy-sidebar">
+        <input type="text" id="pharmacySearch" class="pharmacy-search" placeholder="Search pharmacies..." value="@Model.SearchTerm" />
+
+        <button type="button" id="detectLocationBtn" class="pharmacy-detect-btn">
+            <span>&#8853;</span> Detect My Location
+        </button>
+
+        @* Server-rendered fallback shown before JS replaces it with a distance-sorted list *@
+        <div id="pharmacyList">
+            @foreach (var p in Model.Pharmacies)
+            {
+                <div class="pharmacy-card" data-id="@p.Id">
+                    <div class="pharmacy-card-body">
+                        <h4>@p.Name</h4>
+                        <p class="pharmacy-address">@p.Address</p>
+                        <div class="pharmacy-meta">
+                            @if (!string.IsNullOrWhiteSpace(p.PhoneNumber))
+                            {
+                                <a href="tel:@p.PhoneNumber" class="pharmacy-phone">@p.PhoneNumber</a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </aside>
+
+    <div id="pharmacyMap"></div>
+</div>
+
+@section Scripts {
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="~/js/pharmacy.js"></script>
+    <script src="~/js/pharmacy-page.js"></script>
+}

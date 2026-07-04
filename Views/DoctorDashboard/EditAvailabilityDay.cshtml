@@ -1,0 +1,110 @@
+@model Midix.ViewModel.EditAvailabilityDayViewModel
+
+@{
+    ViewData["Title"]     = "Edit Availability";
+    ViewData["ActiveTab"] = "availability";
+}
+
+@section Styles {
+<style>
+    #navbar { display: none; }
+    body     { background: var(--gray-50); }
+    .sidebar-link.logout-btn {
+        width: 100%; background: none; border: none; cursor: pointer; text-align: left;
+        display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+        border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; color: var(--gray-600);
+        transition: var(--transition);
+    }
+    .sidebar-link.logout-btn:hover { background: #fff0f0; color: #e53e3e; }
+
+    .slot-row {
+        display: flex; align-items: center; gap: .75rem; margin-bottom: .75rem;
+    }
+    .slot-row input[type="time"] {
+        padding: .5rem .75rem; border: 1px solid var(--gray-200);
+        border-radius: var(--radius-sm); font-size: .9rem; color: var(--gray-700);
+    }
+    .remove-row-btn {
+        background: #fff0f0; color: #e53e3e; border: none; border-radius: var(--radius-sm);
+        width: 32px; height: 32px; cursor: pointer; font-size: .85rem;
+    }
+    .remove-row-btn:hover { background: #e53e3e; color: #fff; }
+</style>
+}
+
+<div class="dashboard-layout">
+
+    @await Html.PartialAsync("_DoctorSidebar", (Midix.ViewModel.DoctorHeaderInfo)Model)
+
+    <main class="dashboard-main">
+
+        <div class="dashboard-header teal-header">
+            <div>
+                <h1>Edit Availability — @Model.DisplayDate.ToString("dddd, MMM d, yyyy")</h1>
+                <p>Add or remove time slots for this day</p>
+            </div>
+            <a asp-controller="DoctorDashboard" asp-action="Availability" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Back to Availability
+            </a>
+        </div>
+
+        <div class="dash-card" style="padding:1.5rem;">
+            <form asp-controller="DoctorDashboard" asp-action="EditAvailabilityDay" method="post" id="slotsForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="Date" value="@Model.Date" />
+
+                <div id="slotsContainer">
+                    @for (int i = 0; i < Model.StartTimes.Count; i++)
+                    {
+                        <div class="slot-row">
+                            <input type="time" name="StartTimes" value="@Model.StartTimes[i]" required />
+                            <span>to</span>
+                            <input type="time" name="EndTimes" value="@Model.EndTimes[i]" required />
+                            <button type="button" class="remove-row-btn" onclick="this.parentElement.remove()">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    }
+                </div>
+
+                <button type="button" id="addRowBtn" class="btn btn-outline" style="margin:.5rem 0 1.5rem;">
+                    <i class="fas fa-plus"></i> Add Time Slot
+                </button>
+
+                <div style="display:flex;gap:1rem;">
+                    <button type="submit" class="btn btn-teal">
+                        <i class="fas fa-save"></i> Save Availability
+                    </button>
+                </div>
+            </form>
+
+            <form asp-controller="DoctorDashboard" asp-action="ClearAvailabilityDay" method="post"
+                  style="margin-top:1rem;" onsubmit="return confirm('Clear all slots for this day?');">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="date" value="@Model.Date" />
+                <button type="submit" class="btn btn-outline" style="color:#e53e3e;border-color:#e53e3e;">
+                    <i class="fas fa-trash-alt"></i> Clear This Day
+                </button>
+            </form>
+        </div>
+
+    </main>
+</div>
+
+@section Scripts {
+    <script>
+        // Cosmetic only — adds a blank row to the real <form>. Final submission
+        // is a normal HTML form POST, no fetch/AJAX involved.
+        document.getElementById('addRowBtn').addEventListener('click', function () {
+            var row = document.createElement('div');
+            row.className = 'slot-row';
+            row.innerHTML =
+                '<input type="time" name="StartTimes" value="09:00" required />' +
+                '<span>to</span>' +
+                '<input type="time" name="EndTimes" value="17:00" required />' +
+                '<button type="button" class="remove-row-btn" onclick="this.parentElement.remove()">' +
+                '<i class="fas fa-trash"></i></button>';
+            document.getElementById('slotsContainer').appendChild(row);
+        });
+    </script>
+}

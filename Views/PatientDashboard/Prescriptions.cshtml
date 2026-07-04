@@ -1,0 +1,132 @@
+@model Midix.ViewModel.PatientPrescriptionsViewModel
+
+@{
+    ViewData["Title"]     = "My Prescriptions";
+    ViewData["ActiveTab"] = "prescriptions";
+}
+
+@section Styles {
+<style>
+    body { background: var(--gray-50); }
+
+        #navbar {
+            display: none;
+        }
+    .sidebar-link.logout-btn {
+        width: 100%; background: none; border: none; cursor: pointer; text-align: left;
+        display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+        border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; color: var(--gray-600);
+        transition: var(--transition);
+    }
+    .sidebar-link.logout-btn:hover { background: #fff0f0; color: #e53e3e; }
+
+    .rx-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px,1fr)); gap: 1.25rem; }
+    .rx-card { background: #fff; border-radius: var(--radius); box-shadow: var(--shadow-sm); padding: 1.5rem; }
+    .rx-card-header { display: flex; align-items: center; gap: .75rem; margin-bottom: 1rem;
+                       padding-bottom: 1rem; border-bottom: 1px solid var(--gray-100); }
+    .rx-meds { display: flex; flex-direction: column; gap: .5rem; }
+    .rx-med-row { display: flex; justify-content: space-between; font-size: .85rem;
+                  padding: .5rem .75rem; background: var(--gray-50); border-radius: var(--radius-sm); }
+    .rx-med-row strong { color: var(--gray-900); }
+    .rx-med-row span { color: var(--gray-500); }
+    .rx-notes { margin-top: 1rem; font-size: .8rem; color: var(--gray-500); font-style: italic; }
+
+    .pagination-bar {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 1rem; font-size: .875rem; color: var(--gray-500); flex-wrap: wrap; gap: .5rem;
+        grid-column: 1 / -1;
+    }
+    .pagination-controls { display: flex; gap: .4rem; align-items: center; }
+    .page-btn {
+        padding: .3rem .7rem; border: 1px solid var(--gray-200);
+        border-radius: var(--radius-sm); background: #fff;
+        color: var(--gray-700); text-decoration: none; font-size: .8rem; transition: .15s;
+    }
+    .page-btn:hover    { background: var(--blue); color: #fff; border-color: var(--blue); }
+    .page-btn.disabled { opacity: .4; cursor: not-allowed; pointer-events: none; }
+    .page-btn.current  { background: var(--blue); color: #fff; border-color: var(--blue); font-weight: 700; }
+</style>
+}
+
+<div class="dashboard-layout">
+
+    @await Html.PartialAsync("_PatientSidebar", (Midix.ViewModel.PatientHeaderInfo)Model)
+
+    <main class="dashboard-main">
+
+        <div class="dashboard-header blue-header">
+            <div>
+                <h1>My Prescriptions</h1>
+                <p>All prescriptions issued by your doctors</p>
+            </div>
+        </div>
+
+        @if (!Model.Prescriptions.Any())
+        {
+            <div class="dash-card" style="padding:2rem;text-align:center;color:var(--gray-400);">
+                No prescriptions yet.
+            </div>
+        }
+        else
+        {
+            <div class="rx-grid">
+                @foreach (var rx in Model.Prescriptions)
+                {
+                    <div class="rx-card">
+                        <div class="rx-card-header">
+                            <div class="avatar-mini">@rx.DoctorInitials</div>
+                            <div>
+                                <strong style="display:block;color:var(--gray-900);">@rx.DoctorName</strong>
+                                <span style="font-size:.8rem;color:var(--gray-500);">@rx.DoctorSpecialization · @rx.CreatedAt.ToString("MMM dd, yyyy")</span>
+                            </div>
+                        </div>
+                        <div style="font-size:.85rem;color:var(--gray-700);margin-bottom:.75rem;">
+                            <strong>Diagnosis:</strong> @rx.Diagnosis
+                        </div>
+                        <div class="rx-meds">
+                            @foreach (var m in rx.Medicines)
+                            {
+                                <div class="rx-med-row">
+                                    <strong>@m.Name (@m.Dosage)</strong>
+                                    <span>@m.Frequency · @m.Duration</span>
+                                </div>
+                            }
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(rx.Notes))
+                        {
+                            <div class="rx-notes">"@rx.Notes"</div>
+                        }
+                    </div>
+                }
+
+                @{
+                    var p = Model.Pagination;
+                    int start = Math.Max(1, p.CurrentPage - 2);
+                    int end   = Math.Min(p.TotalPages, p.CurrentPage + 2);
+                }
+                @if (p.TotalPages > 1)
+                {
+                    <div class="pagination-bar">
+                        <span>Page @p.CurrentPage of @p.TotalPages (@p.TotalItems prescriptions)</span>
+                        <div class="pagination-controls">
+                            <a asp-action="Prescriptions" asp-route-page="1" asp-route-pageSize="@p.PageSize"
+                               class="page-btn @(!p.HasPrevious ? "disabled" : "")"><i class="fas fa-angle-double-left"></i></a>
+                            <a asp-action="Prescriptions" asp-route-page="@(p.CurrentPage - 1)" asp-route-pageSize="@p.PageSize"
+                               class="page-btn @(!p.HasPrevious ? "disabled" : "")"><i class="fas fa-angle-left"></i></a>
+                            @for (int i = start; i <= end; i++)
+                            {
+                                <a asp-action="Prescriptions" asp-route-page="@i" asp-route-pageSize="@p.PageSize"
+                                   class="page-btn @(i == p.CurrentPage ? "current" : "")">@i</a>
+                            }
+                            <a asp-action="Prescriptions" asp-route-page="@(p.CurrentPage + 1)" asp-route-pageSize="@p.PageSize"
+                               class="page-btn @(!p.HasNext ? "disabled" : "")"><i class="fas fa-angle-right"></i></a>
+                            <a asp-action="Prescriptions" asp-route-page="@p.TotalPages" asp-route-pageSize="@p.PageSize"
+                               class="page-btn @(!p.HasNext ? "disabled" : "")"><i class="fas fa-angle-double-right"></i></a>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+    </main>
+</div>

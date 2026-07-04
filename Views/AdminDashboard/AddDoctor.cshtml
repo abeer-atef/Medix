@@ -1,0 +1,347 @@
+﻿@model Midix.ViewModel.AddDoctorViewModel
+
+@{
+    ViewData["Title"] = "Add New Doctor";
+}
+
+@section Styles {
+    <style>
+        #navbar {
+            display: none;
+        }
+
+        body {
+            background: var(--gray-50);
+        }
+
+        .add-doctor-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .add-doctor-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--gray-100);
+            width: 100%;
+            max-width: 720px;
+            overflow: hidden;
+        }
+
+        .add-doctor-header {
+            background: linear-gradient(135deg, var(--orange), #c2410c);
+            padding: 28px 32px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+            .add-doctor-header .header-icon {
+                width: 48px;
+                height: 48px;
+                background: rgba(255,255,255,0.2);
+                border-radius: var(--radius-md);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 22px;
+                color: white;
+                flex-shrink: 0;
+            }
+
+            .add-doctor-header h2 {
+                color: white;
+                font-family: var(--font-heading);
+                font-size: 20px;
+                font-weight: 700;
+                margin-bottom: 2px;
+            }
+
+            .add-doctor-header p {
+                color: rgba(255,255,255,0.8);
+                font-size: 13px;
+            }
+
+        .add-doctor-body {
+            padding: 32px;
+        }
+
+        .form-section-title {
+            font-family: var(--font-heading);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--gray-400);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin: 24px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+            .form-section-title:first-child {
+                margin-top: 0;
+            }
+
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+            .form-group.full {
+                grid-column: 1 / -1;
+            }
+
+            .form-group label {
+                font-size: 13px;
+                font-weight: 600;
+                color: var(--gray-700);
+            }
+
+                .form-group label span.required {
+                    color: var(--red);
+                    margin-left: 2px;
+                }
+
+        .form-control {
+            padding: 10px 14px;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            color: var(--gray-800);
+            outline: none;
+            transition: var(--transition);
+            width: 100%;
+            background: white;
+        }
+
+            .form-control:focus {
+                border-color: var(--orange);
+                box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1);
+            }
+
+        select.form-control {
+            cursor: pointer;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .field-error {
+            font-size: 12px;
+            color: var(--red);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .alert-danger {
+            background: var(--red-light);
+            color: var(--red);
+            border: 1px solid rgba(220,38,38,0.2);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid var(--gray-100);
+        }
+
+        /* ── Responsive: stack to one column on small screens ── */
+        @@media (max-width: 640px) {
+            .add-doctor-wrapper {
+                padding: 20px 12px;
+            }
+
+            .add-doctor-body {
+                padding: 20px;
+            }
+
+            .form-grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column-reverse;
+            }
+
+                .form-actions .btn-outline,
+                .form-actions .btn-orange {
+                    width: 100%;
+                    justify-content: center;
+                }
+        }
+    </style>
+}
+
+<div class="add-doctor-wrapper">
+    <div class="add-doctor-card">
+
+        <!-- Header -->
+        <div class="add-doctor-header">
+            <div class="header-icon"><i class="fas fa-user-md"></i></div>
+            <div>
+                <h2>Add New Doctor</h2>
+                <p>Fill in the details to register a new doctor to the system</p>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <div class="add-doctor-body">
+
+            @* Global errors *@
+            @if (!ViewData.ModelState.IsValid)
+            {
+                var globalErrors = ViewData.ModelState[""]?.Errors;
+                if (globalErrors != null && globalErrors.Count > 0)
+                {
+                    <div class="alert-danger">
+                        @foreach (var e in globalErrors)
+                        {
+                            <div><i class="fas fa-exclamation-circle"></i> @e.ErrorMessage</div>
+                        }
+                    </div>
+                }
+            }
+
+            <form asp-controller="AdminDashboard" asp-action="AddDoctor" method="post">
+                @Html.AntiForgeryToken()
+
+                <!-- Personal Info -->
+                <div class="form-section-title">Personal Information</div>
+                <div class="form-grid-2">
+
+                    <div class="form-group">
+                        <label asp-for="FirstName">First Name <span class="required">*</span></label>
+                        <input asp-for="FirstName" class="form-control" placeholder="e.g. Sarah" />
+                        <span asp-validation-for="FirstName" class="field-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="LastName">Last Name <span class="required">*</span></label>
+                        <input asp-for="LastName" class="form-control" placeholder="e.g. Johnson" />
+                        <span asp-validation-for="LastName" class="field-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Email">Email <span class="required">*</span></label>
+                        <input asp-for="Email" class="form-control" placeholder="doctor@medix.com" />
+                        <span asp-validation-for="Email" class="field-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="PhoneNumber">Phone Number <span class="required">*</span></label>
+                        <input asp-for="PhoneNumber" class="form-control" placeholder="+20 1XX XXX XXXX" />
+                        <span asp-validation-for="PhoneNumber" class="field-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="DateOfBirth">Date of Birth <span class="required">*</span></label>
+                        <input asp-for="DateOfBirth" class="form-control" type="date" />
+                        <span asp-validation-for="DateOfBirth" class="field-error"></span>
+                    </div>
+
+                </div>
+
+                <!-- Professional Info -->
+                <div class="form-section-title">Professional Information</div>
+                <div class="form-grid-2">
+
+                    <div class="form-group">
+                        <label asp-for="SpecializationId">Specialization <span class="required">*</span></label>
+                        <select asp-for="SpecializationId"
+                                asp-items="Model.Specializations"
+                                class="form-control">
+                            <option value="">— Select Specialization —</option>
+                        </select>
+                        <span asp-validation-for="SpecializationId" class="field-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="ConsultationFee">Consultation Fee ($) <span class="required">*</span></label>
+                        <input asp-for="ConsultationFee" class="form-control"
+                               type="number" min="0" step="0.01" placeholder="e.g. 150" />
+                        <span asp-validation-for="ConsultationFee" class="field-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="FollowUpFee">Follow-up Fee ($) <span class="required">*</span></label>
+                        <input asp-for="FollowUpFee" class="form-control"
+                               type="number" min="0" step="0.01" placeholder="e.g. 90" />
+                        <span asp-validation-for="FollowUpFee" class="field-error"></span>
+                    </div>
+
+                    <div class="form-group full">
+                        <label asp-for="ClinicAddress">Clinic Address</label>
+                        <input asp-for="ClinicAddress" class="form-control"
+                               placeholder="e.g. Medix Medical Center, Cairo" />
+                        <span asp-validation-for="ClinicAddress" class="field-error"></span>
+                    </div>
+
+                    <div class="form-group full">
+                        <label asp-for="Bio">Bio</label>
+                        <textarea asp-for="Bio" class="form-control"
+                                  placeholder="Brief description about the doctor..."></textarea>
+                        <span asp-validation-for="Bio" class="field-error"></span>
+                    </div>
+
+                </div>
+
+                <!-- Account Credentials -->
+                <div class="form-section-title">Account Credentials</div>
+                <div class="form-grid-2">
+
+                    <div class="form-group">
+                        <label asp-for="Password">Password <span class="required">*</span></label>
+                        <input asp-for="Password" class="form-control"
+                               type="password" placeholder="Min. 6 characters" />
+                        <span asp-validation-for="Password" class="field-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="ConfirmPassword">Confirm Password <span class="required">*</span></label>
+                        <input asp-for="ConfirmPassword" class="form-control"
+                               type="password" placeholder="Repeat password" />
+                        <span asp-validation-for="ConfirmPassword" class="field-error"></span>
+                    </div>
+
+                </div>
+
+                <!-- Actions -->
+                <div class="form-actions">
+                    <a href="@Url.Action("Index", "AdminDashboard")" class="btn btn-outline">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                    <button type="submit" class="btn btn-orange">
+                        <i class="fas fa-plus"></i> Add Doctor
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}
+

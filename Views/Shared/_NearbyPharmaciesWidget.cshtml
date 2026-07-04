@@ -1,0 +1,28 @@
+﻿@* _NearbyPharmaciesWidget.cshtml *@
+@* Include on the homepage with: <partial name="_NearbyPharmaciesWidget" /> *@
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="~/css/pharmacy.css" />
+<link rel="stylesheet" href="~/css/pharmacy-widget-additions.css" />  @* ← ADD THIS LINE *@
+
+<section class="pharmacy-widget-section">
+    <h2>Nearby Pharmacies</h2>
+    <div class="pharmacy-widget">
+        <div id="homePharmacyMap"></div>
+        <div>
+            <button type="button" id="detectLocationBtn" class="pharmacy-detect-btn">
+                <span>⊕</span> Detect My Location
+            </button>  @* ← ADD THIS BUTTON *@
+
+            <ul id="homePharmacyList" class="pharmacy-widget-list">
+                <li>Loading pharmacies...</li>
+            </ul>
+            <div class="pharmacy-widget-footer">
+                <a asp-controller="Pharmacy" asp-action="Index">View All Pharmacies &rarr;</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="~/js/pharmacy.js"></script>
+<script src="~/js/pharmacy-widget.js"></script>

@@ -1,0 +1,275 @@
+﻿@model Midix.ViewModel.DoctorsListViewModel
+@{
+    ViewData["Title"] = "Our Doctors";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-badge">Find a Doctor</span>
+            <h2 class="section-title">Meet Our <span class="highlight">Doctors</span></h2>
+            <p class="section-subtitle">Search and browse our specialists, then book an appointment that fits your schedule.</p>
+        </div>
+
+        <form asp-controller="Home" asp-action="Doctors" method="get" class="dr-search-bar">
+            <input type="text" name="search" value="@Model.SearchTerm" placeholder="Search by doctor name or specialty..." class="dr-search-input" />
+            <select name="specializationId" class="dr-search-select">
+                <option value="">All Specializations</option>
+                @foreach (var item in Model.Specializations)
+                {
+                    <option value="@item.Value" selected="@(Model.SelectedSpecializationId.HasValue && Model.SelectedSpecializationId.Value.ToString() == item.Value)">@item.Text</option>
+                }
+            </select>
+            <button type="submit"
+                    class="btn btn-primary">
+                <i class="fas fa-search"></i> Search
+            </button>
+
+            <input type="hidden" name="page" value="1" />
+        </form>
+
+        @if (!Model.Doctors.Any())
+        {
+            <div class="dr-empty-state">
+                <i class="fas fa-user-md"></i>
+                <p>No doctors found matching your search. Try a different name or specialization.</p>
+            </div>
+        }
+        else
+        {
+            <div class="dr-grid">
+                @foreach (var doc in Model.Doctors)
+                {
+                    <div class="dr-card">
+                        <div class="dr-card-top">
+                            @if (!string.IsNullOrEmpty(doc.Picture))
+                            {
+                                <img src="@doc.Picture" alt="@doc.FullName" class="dr-photo" />
+                            }
+                            else
+                            {
+                                <div class="dr-avatar">@doc.Initials</div>
+                            }
+                            <div class="dr-rating">
+                                @if (doc.RatingCount > 0)
+                                {
+                                    <i class="fas fa-star"></i> <span>@doc.AverageRating.ToString("0.0")</span> <small>(@doc.RatingCount)</small>
+                                }
+                                else
+                                {
+                                    <small>No reviews yet</small>
+                                }
+                            </div>
+                        </div>
+                       
+                        <h3 class="dr-name">@doc.FullName</h3>
+                        <span class="dr-specialty">@doc.SpecializationName</span>
+                        <p class="dr-bio">@doc.Bio</p>
+                        <div class="dr-meta">
+                            <span><i class="fas fa-map-marker-alt"></i> @doc.ClinicAddress</span>
+                            <span><i class="fas fa-money-bill-wave"></i> $@doc.ConsultationFee.ToString("0.##")</span>
+                        </div>
+                        <a href="@Url.Action("Login", "Account", new { returnUrl = Url.Action("Doctors", "Home") })" class="btn btn-primary dr-book-btn">
+                            <i class="fas fa-calendar-plus"></i> Book Appointment
+                        </a>
+                    </div>
+                }
+            </div>
+            @if (Model.Pagination.TotalPages > 1)
+            {
+                <div class="pagination">
+
+                    @if (Model.Pagination.HasPrevious)
+                    {
+                        <a asp-action="Doctors"
+                           asp-route-search="@Model.SearchTerm"
+                           asp-route-specializationId="@Model.SelectedSpecializationId"
+                           asp-route-page="@(Model.Pagination.CurrentPage - 1)">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    }
+
+                    @for (int i = 1; i <= Model.Pagination.TotalPages; i++)
+                    {
+                        <a asp-action="Doctors"
+                           asp-route-search="@Model.SearchTerm"
+                           asp-route-specializationId="@Model.SelectedSpecializationId"
+                           asp-route-page="@i"
+                           class="@(i == Model.Pagination.CurrentPage ? "active" : "")">
+                            @i
+                        </a>
+                    }
+
+                    @if (Model.Pagination.HasNext)
+                    {
+                        <a asp-action="Doctors"
+                           asp-route-search="@Model.SearchTerm"
+                           asp-route-specializationId="@Model.SelectedSpecializationId"
+                           asp-route-page="@(Model.Pagination.CurrentPage + 1)">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    }
+
+                </div>
+            }
+        }
+    </div>
+</section>
+
+@section Styles {
+    <style>
+        .dr-search-bar { display:flex; flex-wrap:wrap; gap:12px; margin:32px 0 40px; }
+        .dr-search-input, .dr-search-select { flex:1; min-width:200px; padding:12px 16px; border:1px solid #e2e8f0; border-radius:10px; font-size:15px; font-family:inherit; }
+
+            .dr-search-input:focus, .dr-search-select:focus {
+                outline: none;
+                border-color: #2563eb;
+            }
+
+        .dr-empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+
+            .dr-empty-state i {
+                font-size: 48px;
+                color: #cbd5e1;
+                margin-bottom: 16px;
+                display: block;
+            }
+
+        .dr-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px,1fr));
+            gap: 24px;
+        }
+
+        .dr-card {
+            background: #fff;
+            border: 1px solid #eef0f3;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 14px rgba(15,23,42,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dr-card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .dr-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: #2563eb;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 20px;
+        }
+
+        .dr-photo {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .dr-rating {
+            font-size: 14px;
+            color: #f59e0b;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+            .dr-rating small {
+                color: #9ca3af;
+                margin-left: 4px;
+            }
+
+        .dr-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #111827;
+            margin: 0 0 4px;
+        }
+
+        .dr-specialty {
+            display: inline-block;
+            background: #eff6ff;
+            color: #2563eb;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+            width: fit-content;
+        }
+
+        .dr-bio {
+            font-size: 14px;
+            color: #6b7280;
+            line-height: 1.5;
+            margin-bottom: 14px;
+            flex-grow: 1;
+        }
+
+        .dr-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 13px;
+            color: #374151;
+            margin-bottom: 18px;
+        }
+
+            .dr-meta i {
+                color: #2563eb;
+                width: 16px;
+            }
+
+        .dr-book-btn {
+            text-align: center;
+            justify-content: center;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 40px;
+        }
+
+            .pagination a {
+                width: 42px;
+                height: 42px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                border-radius: 10px;
+                border: 1px solid #dbeafe;
+                text-decoration: none;
+                color: #2563eb;
+                font-weight: 600;
+                transition: .2s;
+            }
+
+                .pagination a:hover {
+                    background: #eff6ff;
+                }
+
+                .pagination a.active {
+                    background: #2563eb;
+                    color: #fff;
+                }
+    </style>
+}

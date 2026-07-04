@@ -1,0 +1,161 @@
+﻿@model Midix.ViewModel.AddAdminViewModel
+
+@{
+    ViewData["Title"] = "Add New Admin";
+}
+
+@section Styles {
+    <style>
+        #navbar {
+            display: none;
+        }
+
+        body {
+            background: var(--gray-50);
+        }
+
+        .form-card {
+            max-width: 640px;
+            margin: 2rem auto;
+            background: #fff;
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+            .form-card h2 {
+                font-family: var(--font-heading);
+                font-weight: 700;
+                color: var(--gray-900);
+                margin-bottom: 1.5rem;
+                display: flex;
+                align-items: center;
+                gap: .6rem;
+            }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: .4rem;
+            margin-bottom: 1rem;
+        }
+
+            .form-group label {
+                font-size: .85rem;
+                font-weight: 600;
+                color: var(--gray-700);
+            }
+
+            .form-group input {
+                padding: .6rem .9rem;
+                border: 1.5px solid var(--gray-200);
+                border-radius: var(--radius-sm);
+                font-size: .9rem;
+                color: var(--gray-900);
+                transition: border-color .2s;
+            }
+
+                .form-group input:focus {
+                    outline: none;
+                    border-color: var(--purple,#805ad5);
+                }
+
+        .info-banner {
+            background: #faf5ff;
+            border: 1.5px solid #d6bcfa;
+            border-radius: var(--radius-sm);
+            padding: .75rem 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: .6rem;
+            align-items: flex-start;
+            font-size: .85rem;
+            color: #553c9a;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: .75rem;
+            justify-content: flex-end;
+            margin-top: 1rem;
+        }
+    </style>
+}
+
+<div class="form-card">
+    <h2>
+        <i class="fas fa-user-shield" style="color:var(--purple,#805ad5)"></i>
+        Add New Admin
+    </h2>
+
+    <div class="info-banner">
+        <i class="fas fa-info-circle" style="margin-top:2px;"></i>
+        <span>The new admin will have full access to the Admin Control Center.</span>
+    </div>
+
+    <form asp-controller="AdminDashboard" asp-action="AddAdmin" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="form-row">
+            <div class="form-group">
+                <label asp-for="FirstName"></label>
+                <input asp-for="FirstName" placeholder="John" />
+                <span asp-validation-for="FirstName" class="text-danger" style="font-size:.8rem;"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="LastName"></label>
+                <input asp-for="LastName" placeholder="Doe" />
+                <span asp-validation-for="LastName" class="text-danger" style="font-size:.8rem;"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Email"></label>
+            <input asp-for="Email" type="email" placeholder="admin@medix.com" />
+            <span asp-validation-for="Email" class="text-danger" style="font-size:.8rem;"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="PhoneNumber"></label>
+            <input asp-for="PhoneNumber" placeholder="+1 555 000 0000" />
+            <span asp-validation-for="PhoneNumber" class="text-danger" style="font-size:.8rem;"></span>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label asp-for="Password"></label>
+                <input asp-for="Password" type="password" placeholder="Min. 8 characters" />
+                <span asp-validation-for="Password" class="text-danger" style="font-size:.8rem;"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ConfirmPassword"></label>
+                <input asp-for="ConfirmPassword" type="password" placeholder="Repeat password" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger" style="font-size:.8rem;"></span>
+            </div>
+        </div>
+
+        <div asp-validation-summary="ModelOnly" class="text-danger" style="margin-bottom:1rem;font-size:.85rem;"></div>
+
+        <div class="form-actions">
+            <a asp-controller="AdminDashboard" asp-action="Index"
+               class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-orange" style="background:var(--purple,#805ad5);border-color:var(--purple,#805ad5);">
+                <i class="fas fa-user-plus"></i> Create Admin
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

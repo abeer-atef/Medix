@@ -1,0 +1,234 @@
+﻿@model Midix.ViewModel.EditDoctorProfileViewModel
+
+@{
+    ViewData["Title"] = "Update Profile";
+}
+
+@section Styles {
+    <style>
+        body {
+            background: #f8fafc;
+        }
+
+        .profile-wrapper {
+            max-width: 760px;
+            margin: 40px auto;
+            padding: 0 16px;
+        }
+
+        .profile-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,.07);
+            border: none;
+        }
+
+        .profile-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+        }
+
+            .profile-title i {
+                color: #14b8a6;
+            }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-full {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: .4rem;
+            margin-bottom: 1rem;
+        }
+
+            .form-group label {
+                font-size: .85rem;
+                font-weight: 600;
+                color: #334155;
+            }
+
+            .form-group input, .form-group select, .form-group textarea {
+                padding: .6rem .9rem;
+                border: 1.5px solid #dbe2ea;
+                border-radius: 10px;
+                font-size: .9rem;
+                color: #0f172a;
+                transition: border-color .2s;
+                background: #fff;
+            }
+
+                .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+                    outline: none;
+                    border-color: #14b8a6;
+                    box-shadow: 0 0 0 3px rgba(20,184,166,.12);
+                }
+
+            .form-group textarea {
+                min-height: 120px;
+                resize: vertical;
+            }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #f1f5f9;
+            justify-content: flex-end;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #e85d2f, #c94a20);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: .3s;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+            .btn-save:hover {
+                background: linear-gradient(135deg, #c94a20, #b03d15);
+            }
+
+        .btn-back {
+            background: white;
+            color: #2563eb;
+            border: 2px solid #2563eb;
+            border-radius: 50px;
+            padding: 10px 22px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+            .btn-back:hover {
+                background: #2563eb;
+                color: white;
+            }
+    </style>
+}
+
+<div class="profile-wrapper">
+    <div class="profile-card">
+        <h2 class="profile-title">
+            <i class="fas fa-user-edit"></i> Update Profile
+        </h2>
+
+        <form asp-action="UpdateDoctor" method="post" enctype="multipart/form-data">
+            <div style="text-align:center;margin-bottom:25px;">
+                <img id="previewImage"
+                     src="@(!string.IsNullOrEmpty(Model.CurrentPicture) ? Url.Content("~/images/users/" + Model.CurrentPicture) : Url.Content("~/images/default-user.png"))"
+                     style="width:130px;height:130px;border-radius:50%;object-fit:cover;border:4px solid #14b8a6;" />
+
+                <div style="margin-top:12px;">
+                    <label for="PictureFile" class="btn-save" style="cursor:pointer;">
+                        <i class="fas fa-camera"></i> Change Profile Photo
+                    </label>
+                    <input asp-for="PictureFile" id="PictureFile" type="file" accept="image/*" style="display:none;" />
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label asp-for="FirstName"></label>
+                    <input asp-for="FirstName" />
+                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="LastName"></label>
+                    <input asp-for="LastName" />
+                    <span asp-validation-for="LastName" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label asp-for="Email"></label>
+                    <input asp-for="Email" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="PhoneNumber"></label>
+                    <input asp-for="PhoneNumber" />
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label asp-for="ConsultationFee"></label>
+                    <input asp-for="ConsultationFee" />
+                </div>
+                <div class="form-group">
+                    <label asp-for="FollowUpFee"></label>
+                    <input asp-for="FollowUpFee" />
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Specialization</label>
+                    <select asp-for="SpecializationId" asp-items="ViewBag.Specializations"></select>
+                </div>
+            </div>
+
+            <div class="form-full">
+                <div class="form-group">
+                    <label asp-for="ClinicAddress"></label>
+                    <input asp-for="ClinicAddress" />
+                </div>
+                <div class="form-group">
+                    <label asp-for="Bio"></label>
+                    <textarea asp-for="Bio"></textarea>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <a asp-controller="DoctorDashboard" asp-action="Index" class="btn-back">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+                <button type="submit" class="btn-save">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById("PictureFile")
+            .addEventListener("change", function (event) {
+
+                const file = event.target.files[0];
+
+                if (file) {
+                    document.getElementById("previewImage")
+                        .src = URL.createObjectURL(file);
+                }
+            });
+    </script>
+}

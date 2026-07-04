@@ -1,0 +1,143 @@
+@model Midix.ViewModel.BookAppointmentViewModel
+@using Midix.Models
+
+@{
+    ViewData["Title"]     = "Confirm Booking";
+    ViewData["ActiveTab"] = "book";
+    DateTime.TryParse($"{Model.SelectedDate} {Model.SelectedTime}", out var apptDateTime);
+}
+
+@section Styles {
+<style>
+    body { background: var(--gray-50); }
+
+        #navbar {
+            display: none;
+        }
+    .sidebar-link.logout-btn {
+        width: 100%; background: none; border: none; cursor: pointer; text-align: left;
+        display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+        border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; color: var(--gray-600);
+        transition: var(--transition);
+    }
+    .sidebar-link.logout-btn:hover { background: #fff0f0; color: #e53e3e; }
+
+    .booking-card { max-width: 640px; background: #fff; border-radius: var(--radius);
+                    box-shadow: var(--shadow-sm); padding: 2rem; }
+
+    .summary-row {
+        display: flex; justify-content: space-between; padding: .75rem 0;
+        border-bottom: 1px solid var(--gray-100); font-size: .9rem;
+    }
+    .summary-row:last-child { border-bottom: none; }
+    .summary-row span:first-child { color: var(--gray-500); }
+    .summary-row span:last-child  { font-weight: 600; color: var(--gray-900); }
+
+    .pay-options { display: flex; gap: .75rem; margin: 1.5rem 0; flex-wrap: wrap; }
+    .pay-option {
+        flex: 1; min-width: 130px; border: 1.5px solid var(--gray-200); border-radius: var(--radius-sm);
+        padding: .9rem; text-align: center; cursor: pointer; transition: .15s;
+    }
+    .pay-option input { display: none; }
+    .pay-option i { font-size: 1.4rem; color: var(--gray-400); margin-bottom: .4rem; display: block; }
+    .pay-option span { font-size: .85rem; font-weight: 600; color: var(--gray-600); }
+    .pay-option:has(input:checked) { border-color: var(--blue); background: var(--blue-light); }
+    .pay-option:has(input:checked) i,
+    .pay-option:has(input:checked) span { color: var(--blue); }
+</style>
+}
+
+<div class="dashboard-layout">
+
+    @await Html.PartialAsync("_PatientSidebar", (Midix.ViewModel.PatientHeaderInfo)Model)
+
+    <main class="dashboard-main">
+
+        <div class="dashboard-header blue-header">
+            <div>
+                <h1>Confirm &amp; Pay</h1>
+                <p>Step 3 of 3 — Review and confirm your appointment</p>
+            </div>
+            <a asp-controller="PatientDashboard" asp-action="SelectTime"
+               asp-route-doctorId="@Model.SelectedDoctorId" asp-route-date="@Model.SelectedDate"
+               class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Change Time
+            </a>
+        </div>
+
+        <div class="booking-card">
+
+            <div class="summary-row"><span>Doctor</span><span>@Model.SelectedDoctorName</span></div>
+            <div class="summary-row"><span>Specialty</span><span>@Model.SelectedSpec</span></div>
+            <div class="summary-row"><span>Date &amp; Time</span><span>@apptDateTime.ToString("dddd, MMM d, yyyy — h:mm tt")</span></div>
+            <div class="summary-row"><span>Visit Type</span><span>@(Model.SelectedAppointmentType == "FollowUp" ? "Follow-Up (إعادة)" : "New Visit (كشف)")</span></div>
+            <div class="summary-row"><span>Fee</span><span id="displayedFee">$@Model.SelectedFee.ToString("0.00")</span></div>
+
+            <form asp-controller="PatientDashboard" asp-action="BookAppointmentConfirm" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="doctorId" value="@Model.SelectedDoctorId" />
+                <input type="hidden" name="appointmentDate" value="@Model.SelectedDate" />
+                <input type="hidden" name="appointmentTime" value="@Model.SelectedTime" />
+                <input type="hidden" name="appointmentType" value="@Model.SelectedAppointmentType" id="appointmentTypeInput" />
+
+                <label class="form-label" style="display:block;font-size:.8rem;font-weight:700;color:var(--gray-600);text-transform:uppercase;letter-spacing:.05em;margin:1.25rem 0 .5rem;">
+                    Visit Type
+                </label>
+                <div class="pay-options">
+                    <label class="pay-option" onclick="updateFee('NewVisit')">
+                        <input type="radio" name="appointmentTypeRadio" value="NewVisit"
+                        @(Model.SelectedAppointmentType == "NewVisit" ? "checked" : "")
+                               onchange="document.getElementById('appointmentTypeInput').value='NewVisit'" />
+                        <i class="fas fa-stethoscope"></i>
+                        <span>New Visit </span>
+                        <small style="display:block;color:var(--gray-500);font-size:.75rem;">$@Model.SelectedFee.ToString("0.00")</small>
+                    </label>
+                    <label class="pay-option" onclick="updateFee('FollowUp')">
+                        <input type="radio" name="appointmentTypeRadio" value="FollowUp"
+                        @(Model.SelectedAppointmentType == "FollowUp" ? "checked" : "")
+                               onchange="document.getElementById('appointmentTypeInput').value='FollowUp'" />
+                        <i class="fas fa-redo"></i>
+                        <span>Follow-Up </span>
+                        <small style="display:block;color:var(--gray-500);font-size:.75rem;">$@Model.SelectedFollowUpFee.ToString("0.00")</small>
+                    </label>
+                </div>
+
+                <label class="form-label" style="display:block;font-size:.8rem;font-weight:700;color:var(--gray-600);text-transform:uppercase;letter-spacing:.05em;margin:1.25rem 0 .5rem;">
+                    Payment Method
+                </label>
+                <div class="pay-options">
+                    <label class="pay-option">
+                        <input type="radio" name="paymentMethod" value="Cash" checked />
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>Pay at Clinic</span>
+                    </label>
+                    <label class="pay-option">
+                        <input type="radio" name="paymentMethod" value="Card" />
+                        <i class="fas fa-credit-card"></i>
+                        <span>Card</span>
+                    </label>
+                    <label class="pay-option">
+                        <input type="radio" name="paymentMethod" value="Online" />
+                        <i class="fas fa-globe"></i>
+                        <span>Online</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-blue" style="width:100%;margin-top:.5rem;">
+                    <i class="fas fa-check-circle"></i> Confirm Appointment
+                </button>
+            </form>
+        </div>
+
+        @section Scripts {
+            <script>
+                const newVisitFee = @Model.SelectedFee.ToString("0.00");
+                const followUpFee = @Model.SelectedFollowUpFee.ToString("0.00");
+
+                function updateFee(type) {
+                    document.getElementById('appointmentTypeInput').value = type;
+                    document.getElementById('displayedFee').textContent =
+                        '$' + (type === 'FollowUp' ? followUpFee : newVisitFee).toFixed(2);
+                }
+            </script>
+        }

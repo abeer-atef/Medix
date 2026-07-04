@@ -1,0 +1,260 @@
+/* ===== Pharmacy Page ===== */
+.pharmacy-hero {
+    background: linear-gradient(135deg, #1d4ed8, #2563eb);
+    color: #fff;
+    padding: 64px 48px 56px;
+}
+
+    .pharmacy-hero .back-link {
+        color: rgba(255,255,255,0.85);
+        text-decoration: none;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 24px;
+    }
+
+    .pharmacy-hero h1 {
+        font-size: 40px;
+        font-weight: 800;
+        margin: 0 0 12px;
+    }
+
+    .pharmacy-hero p {
+        font-size: 16px;
+        color: rgba(255,255,255,0.85);
+        margin: 0;
+    }
+
+.pharmacy-layout {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    min-height: 600px;
+}
+
+.pharmacy-sidebar {
+    padding: 24px;
+    border-right: 1px solid #e5e7eb;
+    overflow-y: auto;
+    max-height: 700px;
+}
+
+.pharmacy-search {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 999px;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 16px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.pharmacy-detect-btn {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: none;
+    background: #2563eb;
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.2s;
+}
+
+    .pharmacy-detect-btn:hover {
+        background: #1d4ed8;
+    }
+
+    .pharmacy-detect-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+.pharmacy-card {
+    padding: 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-bottom: 8px;
+    border: 1px solid transparent;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+    .pharmacy-card:hover {
+        background: #f8fafc;
+    }
+
+    .pharmacy-card.active {
+        background: #eff6ff;
+        border-color: #bfdbfe;
+    }
+
+    .pharmacy-card h4 {
+        margin: 0 0 4px;
+        font-size: 15px;
+        font-weight: 700;
+        color: #111827;
+    }
+
+.pharmacy-address {
+    margin: 0 0 8px;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.pharmacy-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    flex-wrap: wrap;
+}
+
+.pharmacy-distance {
+    background: #dcfce7;
+    color: #15803d;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+.pharmacy-phone {
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.pharmacy-empty {
+    text-align: center;
+    color: #9ca3af;
+    padding: 24px;
+}
+
+#pharmacyMap {
+    height: 100%;
+    min-height: 600px;
+}
+
+/* Leaflet marker pins (no external icon images needed) */
+.pharmacy-pin {
+    width: 30px;
+    height: 30px;
+    background: #16a34a;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+    .pharmacy-pin span {
+        transform: rotate(45deg);
+        color: #fff;
+        font-weight: 700;
+        font-size: 16px;
+        line-height: 1;
+    }
+
+.user-pin {
+    width: 18px;
+    height: 18px;
+    background: #2563eb;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(37,99,235,0.3);
+}
+
+.pharmacy-tooltip {
+    background: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+
+/* ===== Homepage Widget ===== */
+.pharmacy-widget-section {
+    padding: 48px;
+}
+
+    .pharmacy-widget-section h2 {
+        font-size: 26px;
+        font-weight: 800;
+        margin: 0 0 20px;
+        color: #111827;
+    }
+
+.pharmacy-widget {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    padding: 24px;
+}
+
+#homePharmacyMap {
+    height: 280px;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.pharmacy-widget-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+    .pharmacy-widget-list li {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .pharmacy-widget-list .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #16a34a;
+        flex-shrink: 0;
+    }
+
+    .pharmacy-widget-list .distance {
+        display: block;
+        font-size: 12px;
+        color: #6b7280;
+    }
+
+.pharmacy-widget-footer {
+    margin-top: 16px;
+    text-align: right;
+}
+
+    .pharmacy-widget-footer a {
+        color: #2563eb;
+        font-weight: 600;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+@media (max-width: 900px) {
+    .pharmacy-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .pharmacy-widget {
+        grid-template-columns: 1fr;
+    }
+}

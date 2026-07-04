@@ -1,0 +1,298 @@
+﻿@{
+    ViewData["Title"] = "Home";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-badge"><i class="fas fa-shield-alt"></i> Trusted by 50,000+ Patients</div>
+        <h1 class="hero-title">Your Health, Our <span class="highlight">Priority</span></h1>
+        <p class="hero-subtitle">Experience world-class healthcare with expert doctors, modern facilities, and seamless appointment booking — all in one place.</p>
+        <div class="hero-actions">
+            <a class="btn btn-primary btn-lg" href="@Url.Action("BookAppointment", "PatientDashboard")">
+                <i class="fas fa-calendar-plus"></i> Book Appointment Now
+            </a>
+            <a class="btn btn-outline btn-lg" href="@Url.Action("Doctors", "Home")">
+                <i class="fas fa-user-md"></i> Meet Our Doctors
+            </a>
+        </div>
+        <div class="hero-stats">
+            <div class="stat-item">
+                <span class="stat-number">200+</span>
+                <span class="stat-label">Expert Doctors</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-number">50K+</span>
+                <span class="stat-label">Happy Patients</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-number">15+</span>
+                <span class="stat-label">Specialties</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-number">24/7</span>
+                <span class="stat-label">Support</span>
+            </div>
+        </div>
+    </div>
+    <div class="hero-visual">
+        <div class="hero-image-container">
+            <div class="hero-illustration">
+                <div class="medical-card floating-card card-1">
+                    <div class="card-icon green"><i class="fas fa-check-circle"></i></div>
+                    <div class="card-text">
+                        <strong>Appointment Confirmed</strong>
+                        <span>Dr. Sarah Johnson - Today 2:30 PM</span>
+                    </div>
+                </div>
+                <div class="doctor-avatar-container">
+                    <div class="doctor-avatar">
+                        <div class="avatar-circle">
+                            <i class="fas fa-user-md"></i>
+                        </div>
+                        <div class="avatar-ring ring-1"></div>
+                        <div class="avatar-ring ring-2"></div>
+                    </div>
+                </div>
+                <div class="medical-card floating-card card-2">
+                    <div class="card-icon blue"><i class="fas fa-heart"></i></div>
+                    <div class="card-text">
+                        <strong>Health Score</strong>
+                        <span>98/100 - Excellent</span>
+                    </div>
+                </div>
+                <div class="medical-card floating-card card-3">
+                    <div class="card-icon orange"><i class="fas fa-pills"></i></div>
+                    <div class="card-text">
+                        <strong>Prescription Ready</strong>
+                        <span>3 medications prescribed</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-bg-shape"></div>
+        </div>
+    </div>
+</section>
+
+<!-- Services Section -->
+<section class="section" id="services">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-badge">What We Offer</span>
+            <h2 class="section-title">Comprehensive Healthcare <span class="highlight">Services</span></h2>
+            <p class="section-subtitle">We provide a full spectrum of medical services designed to keep you and your family healthy.</p>
+        </div>
+        <div class="services-grid">
+            <div class="service-card">
+                <div class="service-icon"><i class="fas fa-clock"></i></div>
+                <h3>24/7 Emergency Care</h3>
+                <p>Round-the-clock emergency medical services with immediate response teams always ready.</p>
+            </div>
+            <div class="service-card">
+                <div class="service-icon"><i class="fas fa-user-md"></i></div>
+                <h3>Expert Specialists</h3>
+                <p>Over 200 board-certified specialists across 15+ medical disciplines at your service.</p>
+            </div>
+
+            <div class="service-card">
+                <div class="service-icon"><i class="fas fa-robot"></i></div>
+                <h3>AI Chatbot </h3>
+                <p>Our AI chatbot is here to assist you with your healthcare needs.</p>
+            </div>
+            <div class="service-card">
+                <div class="service-icon"><i class="fas fa-prescription-bottle-alt"></i></div>
+                <h3>Digital Prescriptions</h3>
+                <p>Electronic prescriptions sent directly to pharmacies, eliminating paperwork and delays.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Specializations Section -->
+<section class="section section-gray">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-badge">Medical Departments</span>
+            <h2 class="section-title">Browse by <span class="highlight">Specialization</span></h2>
+            <p class="section-subtitle">Find the right specialist for your specific health needs.</p>
+        </div>
+        <div class="specialization-filter">
+            <button class="filter-btn active" onclick="filterDoctors('all', this)">All</button>
+            <button class="filter-btn" onclick="filterDoctors('cardiology', this)">Cardiology</button>
+            <button class="filter-btn" onclick="filterDoctors('dentistry', this)">Dentistry</button>
+            <button class="filter-btn" onclick="filterDoctors('neurology', this)">Neurology</button>
+            <button class="filter-btn" onclick="filterDoctors('orthopedics', this)">Orthopedics</button>
+            <button class="filter-btn" onclick="filterDoctors('pediatrics', this)">Pediatrics</button>
+        </div>
+        <div class="departments-grid">
+            <div class="dept-card" data-dept="cardiology" onclick="filterAndGo('cardiology')">
+                <div class="dept-icon"><i class="fas fa-heartbeat"></i></div>
+                <h3>Cardiology</h3>
+                <p>Heart & Vascular Care</p>
+                <span class="dept-count">12 Doctors</span>
+            </div>
+            <div class="dept-card" data-dept="dentistry" onclick="filterAndGo('dentistry')">
+                <div class="dept-icon"><i class="fas fa-tooth"></i></div>
+                <h3>Dentistry</h3>
+                <p>Oral Health & Surgery</p>
+                <span class="dept-count">8 Doctors</span>
+            </div>
+            <div class="dept-card" data-dept="neurology" onclick="filterAndGo('neurology')">
+                <div class="dept-icon"><i class="fas fa-brain"></i></div>
+                <h3>Neurology</h3>
+                <p>Brain & Nerve Disorders</p>
+                <span class="dept-count">10 Doctors</span>
+            </div>
+            <div class="dept-card" data-dept="orthopedics" onclick="filterAndGo('orthopedics')">
+                <div class="dept-icon"><i class="fas fa-bone"></i></div>
+                <h3>Orthopedics</h3>
+                <p>Bones & Joint Care</p>
+                <span class="dept-count">9 Doctors</span>
+            </div>
+            <div class="dept-card" data-dept="pediatrics" onclick="filterAndGo('pediatrics')">
+                <div class="dept-icon"><i class="fas fa-baby"></i></div>
+                <h3>Pediatrics</h3>
+                <p>Children's Health</p>
+                <span class="dept-count">11 Doctors</span>
+            </div>
+            <div class="dept-card" data-dept="dermatology" onclick="filterAndGo('dermatology')">
+                <div class="dept-icon"><i class="fas fa-hand-sparkles"></i></div>
+                <h3>Dermatology</h3>
+                <p>Skin & Hair Care</p>
+                <span class="dept-count">7 Doctors</span>
+            </div>
+            <div class="dept-card" data-dept="ophthalmology" onclick="filterAndGo('ophthalmology')">
+                <div class="dept-icon"><i class="fas fa-eye"></i></div>
+                <h3>Ophthalmology</h3>
+                <p>Eye Care & Surgery</p>
+                <span class="dept-count">6 Doctors</span>
+            </div>
+            <div class="dept-card" data-dept="psychiatry" onclick="filterAndGo('psychiatry')">
+                <div class="dept-icon"><i class="fas fa-smile"></i></div>
+                <h3>Psychiatry</h3>
+                <p>Mental Health</p>
+                <span class="dept-count">8 Doctors</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- About Section -->
+<section class="section" id="about">
+    <div class="container">
+        <div class="about-grid">
+            <div class="about-visual">
+                <div class="about-image">
+                    <div class="about-shape"></div>
+                    <div class="about-icon-grid">
+                        <div class="about-icon-item"><i class="fas fa-award"></i><span>Award Winning</span></div>
+                        <div class="about-icon-item"><i class="fas fa-certificate"></i><span>ISO Certified</span></div>
+                        <div class="about-icon-item"><i class="fas fa-star"></i><span>5-Star Rated</span></div>
+                        <div class="about-icon-item"><i class="fas fa-users"></i><span>50K+ Patients</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="about-content">
+                <span class="section-badge">About Us</span>
+                <h2 class="section-title">20 Years of <span class="highlight">Excellence</span> in Healthcare</h2>
+                <p>Founded in 2004, Medix has been at the forefront of delivering compassionate, evidence-based medical care. Our mission is simple: to make quality healthcare accessible, efficient, and patient-centered.</p>
+                <p>We combine cutting-edge technology with a human touch, ensuring every patient receives personalized care tailored to their unique needs. Our team of 200+ specialists work collaboratively to provide holistic health solutions.</p>
+                <div class="about-features">
+                    <div class="feature-item"><i class="fas fa-check-circle"></i> Board-Certified Specialists</div>
+                    <div class="feature-item"><i class="fas fa-check-circle"></i> JCI Accredited Facility</div>
+                    <div class="feature-item"><i class="fas fa-check-circle"></i> Electronic Health Records</div>
+                    <div class="feature-item"><i class="fas fa-check-circle"></i> Insurance Accepted</div>
+                </div>
+                <button class="btn btn-primary" onclick="showPage('auth'); toggleAuthForm('loginForm')">Get Started Today</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="section section-blue">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title white">What Our Patients Say</h2>
+        </div>
+        <div class="testimonials-grid">
+            <div class="testimonial-card">
+                <div class="stars">★★★★★</div>
+                <p>"The online booking system made it so easy to schedule my appointment. The doctor was excellent and the entire experience was seamless."</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">JD</div>
+                    <div><strong>Jane Doe</strong><span>Patient since 2022</span></div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <div class="stars">★★★★★</div>
+                <p>"I love how I can view my prescriptions and medical history online. The digital pharmacy locator helped me find the nearest pharmacy quickly."</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">MS</div>
+                    <div><strong>Michael Smith</strong><span>Patient since 2021</span></div>
+                </div>
+            </div>
+            <div class="testimonial-card">
+                <div class="stars">★★★★★</div>
+                <p>"Outstanding care! The cardiology department is world-class. I highly recommend Medix to anyone seeking quality healthcare."</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">AR</div>
+                    <div><strong>Alice Roberts</strong><span>Patient since 2020</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <div class="nav-logo">
+                    <div class="logo-icon"><i class="fas fa-heartbeat"></i></div>
+                    <span class="logo-text">Med<strong>ix</strong></span>
+                </div>
+                <p>Providing world-class healthcare with compassion and innovation since 2004.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+            <div class="footer-links">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="#" onclick="showPage('home')">Home</a></li>
+                    <li><a href="#" onclick="showPage('doctors')">Find a Doctor</a></li>
+                    <li><a href="#" onclick="showPage('pharmacy')">Pharmacy Locator</a></li>
+                    <li><a href="#" onclick="showPage('auth'); toggleAuthForm('loginForm')">Book Appointment</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>Portals</h4>
+                <ul>
+                    <li><a href="#" onclick="showPage('auth')">Patient Portal</a></li>
+                    <li><a href="#" onclick="showDoctorLogin()">Doctor Login</a></li>
+                    <li><a href="#" onclick="showAdminLogin()">Admin Panel</a></li>
+                </ul>
+            </div>
+            <div class="footer-contact">
+                <h4>Contact</h4>
+                <p><i class="fas fa-map-marker-alt"></i> 123 Medical Center Dr, Health City</p>
+                <p><i class="fas fa-phone"></i> +1 (800) 123-4567</p>
+                <p><i class="fas fa-envelope"></i> care@medicarepo.com</p>
+                <p><i class="fas fa-clock"></i> Mon - Sun: 6:00 AM - 11:00 PM</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2026 Medix. All Rights Reserved. | Privacy Policy | Terms of Service</p>
+        </div>
+    </div>
+</footer>

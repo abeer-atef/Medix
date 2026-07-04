@@ -1,0 +1,73 @@
+/* ── Pharmacy Widget – additions for Overpass-powered results ── */
+
+/* Sidebar list items */
+.pharmacy-list-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px 0;
+    border-bottom: 1px solid #e5e7eb;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+    .pharmacy-list-item:hover {
+        background: #f0f4ff;
+        border-radius: 8px;
+        padding-left: 6px;
+    }
+
+.pharmacy-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.pharmacy-distance {
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+.pharmacy-phone {
+    font-size: 0.85rem;
+    color: #2563eb;
+    text-decoration: none;
+}
+
+    .pharmacy-phone:hover {
+        text-decoration: underline;
+    }
+
+.pharmacy-hours {
+    font-size: 0.78rem;
+    color: #059669;
+}
+
+/* Loading / empty message */
+.pharmacy-list-message {
+    list-style: none;
+    padding: 16px 0;
+    color: #6b7280;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+/* Custom map marker */
+.pharmacy-map-marker {
+    width: 36px;
+    height: 36px;
+    background: #2563eb;
+    border: 2px solid #fff;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+    .pharmacy-map-marker span {
+        transform: rotate(45deg);
+        font-size: 16px;
+        line-height: 1;
+    }

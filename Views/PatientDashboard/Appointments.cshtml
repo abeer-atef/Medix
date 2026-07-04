@@ -1,0 +1,239 @@
+@model Midix.ViewModel.PatientAppointmentsViewModel
+@using Midix.Models
+@using Midix.Enums
+
+@{
+    ViewData["Title"] = "My Appointments";
+    ViewData["ActiveTab"] = "appointments";
+}
+
+@section Styles {
+    <style>
+        body {
+            background: var(--gray-50);
+        }
+
+        #navbar {
+            display: none;
+        }
+
+        .sidebar-link.logout-btn {
+            width: 100%;
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--gray-600);
+            transition: var(--transition);
+        }
+
+            .sidebar-link.logout-btn:hover {
+                background: #fff0f0;
+                color: #e53e3e;
+            }
+
+        .pagination-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: .75rem 1rem;
+            border-top: 1px solid var(--gray-100);
+            font-size: .875rem;
+            color: var(--gray-500);
+            flex-wrap: wrap;
+            gap: .5rem;
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: .4rem;
+            align-items: center;
+        }
+
+        .page-btn {
+            padding: .3rem .7rem;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-sm);
+            background: #fff;
+            color: var(--gray-700);
+            text-decoration: none;
+            font-size: .8rem;
+            transition: .15s;
+        }
+
+            .page-btn:hover {
+                background: var(--blue);
+                color: #fff;
+                border-color: var(--blue);
+            }
+
+            .page-btn.disabled {
+                opacity: .4;
+                cursor: not-allowed;
+                pointer-events: none;
+            }
+
+            .page-btn.current {
+                background: var(--blue);
+                color: #fff;
+                border-color: var(--blue);
+                font-weight: 700;
+            }
+
+        .section-title {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--gray-900);
+            margin: 2rem 0 1rem;
+        }
+
+            .section-title:first-of-type {
+                margin-top: 0;
+            }
+    </style>
+}
+
+<div class="dashboard-layout">
+
+    @await Html.PartialAsync("_PatientSidebar", (Midix.ViewModel.PatientHeaderInfo)Model)
+
+    <main class="dashboard-main">
+
+        <div class="dashboard-header blue-header">
+            <div>
+                <h1>My Appointments</h1>
+                <p>Your upcoming and past appointments</p>
+            </div>
+            <a asp-controller="PatientDashboard" asp-action="BookAppointment" class="btn btn-blue">
+                <i class="fas fa-calendar-plus"></i> Book New
+            </a>
+        </div>
+
+        <!-- ── Upcoming ───────────────────────────────────────────────── -->
+        <div class="section-title"><i class="fas fa-calendar-check" style="color:var(--blue);"></i> Upcoming Appointments</div>
+        <div class="dash-card">
+            <div class="appointments-table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Doctor</th><th>Specialty</th><th>Date &amp; Time</th><th>Payment</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var a in Model.Upcoming)
+                        {
+                            var stateBadge = a.State switch
+                            {
+                                AppointmentState.Confirmed => "badge-confirmed",
+                                AppointmentState.Done => "badge-completed",
+                                AppointmentState.InProgress => "badge-warning",
+                                AppointmentState.Cancelled => "badge-danger",
+                                _ => "badge-pending"
+                            };
+                            var payBadge = a.PaymentStatus == PaymentStatus.Paid ? "badge-paid" : "badge-cash";
+                            <tr>
+                                <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar-mini">@a.DoctorInitials</div>@a.DoctorName</div></td>
+                                <td>@a.Specialization</td>
+                                <td>@a.Date.ToString("MMM dd, yyyy — h:mm tt")</td>
+                                <td><span class="badge @payBadge">$@a.Fee.ToString("0")</span></td>
+                                <td><span class="badge @stateBadge">@a.State</span></td>
+                            </tr>
+                        }
+                        @if (!Model.Upcoming.Any())
+                        {
+                            <tr><td colspan="5" style="text-align:center;color:var(--gray-400);padding:2rem;">No upcoming appointments.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @{
+                var up = Model.UpcomingPagination;
+                int us = Math.Max(1, up.CurrentPage - 2);
+                int ue = Math.Min(up.TotalPages, up.CurrentPage + 2);
+            }
+            @if (up.TotalPages > 1)
+            {
+                <div class="pagination-bar">
+                    <span>Page @up.CurrentPage of @up.TotalPages</span>
+                    <div class="pagination-controls">
+                        <a asp-action="Appointments" asp-route-upcomingPage="@(up.CurrentPage - 1)" asp-route-pastPage="@Model.PastPagination.CurrentPage"
+                           class="page-btn @(!up.HasPrevious ? "disabled" : "")"><i class="fas fa-angle-left"></i></a>
+                        @for (int i = us; i <= ue; i++)
+                        {
+                            <a asp-action="Appointments" asp-route-upcomingPage="@i" asp-route-pastPage="@Model.PastPagination.CurrentPage"
+                               class="page-btn @(i == up.CurrentPage ? "current" : "")">@i</a>
+                        }
+                        <a asp-action="Appointments" asp-route-upcomingPage="@(up.CurrentPage + 1)" asp-route-pastPage="@Model.PastPagination.CurrentPage"
+                           class="page-btn @(!up.HasNext ? "disabled" : "")"><i class="fas fa-angle-right"></i></a>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- ── Past ───────────────────────────────────────────────────── -->
+        <div class="section-title"><i class="fas fa-history" style="color:var(--gray-400);"></i> Past Appointments</div>
+        <div class="dash-card">
+            <div class="appointments-table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Doctor</th><th>Specialty</th><th>Date &amp; Time</th><th>Payment</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var a in Model.Past)
+                        {
+                            var stateBadge = a.State switch
+                            {
+                                AppointmentState.Done => "badge-completed",
+                                AppointmentState.Cancelled => "badge-danger",
+                                _ => "badge-pending"
+                            };
+                            var payBadge = a.PaymentStatus == PaymentStatus.Paid ? "badge-paid" : "badge-cash";
+                            <tr>
+                                <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar-mini">@a.DoctorInitials</div>@a.DoctorName</div></td>
+                                <td>@a.Specialization</td>
+                                <td>@a.Date.ToString("MMM dd, yyyy — h:mm tt")</td>
+                                <td><span class="badge @payBadge">$@a.Fee.ToString("0")</span></td>
+                                <td><span class="badge @stateBadge">@a.State</span></td>
+                            </tr>
+                        }
+                        @if (!Model.Past.Any())
+                        {
+                            <tr><td colspan="5" style="text-align:center;color:var(--gray-400);padding:2rem;">No past appointments.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @{
+                var pp = Model.PastPagination;
+                int ps = Math.Max(1, pp.CurrentPage - 2);
+                int pe = Math.Min(pp.TotalPages, pp.CurrentPage + 2);
+            }
+            @if (pp.TotalPages > 1)
+            {
+                <div class="pagination-bar">
+                    <span>Page @pp.CurrentPage of @pp.TotalPages</span>
+                    <div class="pagination-controls">
+                        <a asp-action="Appointments" asp-route-pastPage="@(pp.CurrentPage - 1)" asp-route-upcomingPage="@Model.UpcomingPagination.CurrentPage"
+                           class="page-btn @(!pp.HasPrevious ? "disabled" : "")"><i class="fas fa-angle-left"></i></a>
+                        @for (int i = ps; i <= pe; i++)
+                        {
+                            <a asp-action="Appointments" asp-route-pastPage="@i" asp-route-upcomingPage="@Model.UpcomingPagination.CurrentPage"
+                               class="page-btn @(i == pp.CurrentPage ? "current" : "")">@i</a>
+                        }
+                        <a asp-action="Appointments" asp-route-pastPage="@(pp.CurrentPage + 1)" asp-route-upcomingPage="@Model.UpcomingPagination.CurrentPage"
+                           class="page-btn @(!pp.HasNext ? "disabled" : "")"><i class="fas fa-angle-right"></i></a>
+                    </div>
+                </div>
+            }
+        </div>
+
+    </main>
+</div>

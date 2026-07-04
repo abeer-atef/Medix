@@ -1,0 +1,17 @@
+@{
+    var active = ViewData["UsersTab"]?.ToString() ?? "admins";
+}
+<div class="tabs">
+    <a asp-controller="AdminDashboard" asp-action="AllUsers"
+       class="tab-btn admin-tab @(active == "admins" ? "active" : "")">
+        <i class="fas fa-user-shield"></i> Admins
+    </a>
+    <a asp-controller="AdminDashboard" asp-action="AllPatients"
+       class="tab-btn patient-tab @(active == "patients" ? "active" : "")">
+        <i class="fas fa-user"></i> Patients
+    </a>
+    <a asp-controller="AdminDashboard" asp-action="AllDoctors"
+       class="tab-btn doctor-tab @(active == "doctors" ? "active" : "")">
+        <i class="fas fa-user-md"></i> Doctors
+    </a>
+</div>

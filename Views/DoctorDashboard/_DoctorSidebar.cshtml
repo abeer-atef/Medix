@@ -1,0 +1,124 @@
+@model Midix.ViewModel.DoctorHeaderInfo
+
+@{
+    var active = ViewData["ActiveTab"]?.ToString() ?? "overview";
+}
+
+<style>
+    .sidebar-user {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 20px 10px;
+    }
+
+    .doctor-profile-img {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #14b8a6;
+        margin-bottom: 10px;
+    }
+
+    .user-info strong {
+        display: block;
+        margin-top: 5px;
+    }
+
+    .user-info span {
+        font-size: 13px;
+        color: #94a3b8;
+    }
+</style>
+
+<aside class="sidebar doctor-sidebar">
+
+    <div class="sidebar-brand">
+        <div class="logo-icon small teal-icon">
+            <i class="fas fa-stethoscope"></i>
+        </div>
+        <span>Doctor Portal</span>
+    </div>
+
+    <div class="sidebar-user">
+
+        @if (!string.IsNullOrEmpty(Model.Picture))
+        {
+            <img src="~/images/users/@Model.Picture"
+                 class="doctor-profile-img"
+                 alt="Doctor" />
+        }
+        else
+        {
+            <div class="user-avatar teal-avatar">
+                @Model.Initials
+            </div>
+        }
+
+        <div class="user-info">
+            <strong>@Model.DoctorName</strong>
+            <span>@Model.Specialization</span>
+        </div>
+
+    </div>
+
+    <nav class="sidebar-nav">
+
+        <a asp-controller="DoctorDashboard"
+           asp-action="Index"
+           class="sidebar-link @(active == "overview" ? "active" : "")">
+            <i class="fas fa-chart-pie"></i>
+            Overview
+        </a>
+
+        <a asp-controller="DoctorDashboard"
+           asp-action="Schedule"
+           class="sidebar-link @(active == "schedule" ? "active" : "")">
+            <i class="fas fa-calendar-day"></i>
+            Today's Schedule
+        </a>
+
+        <a asp-controller="DoctorDashboard"
+           asp-action="Patients"
+           class="sidebar-link @(active == "patients" ? "active" : "")">
+            <i class="fas fa-users"></i>
+            My Patients
+        </a>
+
+        <a asp-controller="DoctorDashboard"
+           asp-action="Availability"
+           class="sidebar-link @(active == "availability" ? "active" : "")">
+            <i class="fas fa-clock"></i>
+            Availability
+        </a>
+
+        <a asp-controller="DoctorDashboard"
+           asp-action="MyReviews"
+           class="sidebar-link @(active == "reviews" ? "active" : "")">
+            <i class="fas fa-star"></i>
+            My Reviews
+        </a>
+
+        <a asp-controller="DoctorDashboard"
+           asp-action="UpdateDoctor"
+           class="sidebar-link @(active == "profile" ? "active" : "")">
+            <i class="fas fa-user-edit"></i>
+            Profile
+        </a>
+
+    </nav>
+
+    <div class="sidebar-footer">
+        <form asp-controller="Account" asp-action="Logout" method="post">
+            @Html.AntiForgeryToken()
+
+            <button type="submit" class="sidebar-link logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </button>
+        </form>
+    </div>
+
+</aside>

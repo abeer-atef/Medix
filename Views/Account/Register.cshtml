@@ -1,0 +1,336 @@
+﻿@model Midix.ViewModel.Registerviewmodel
+@using Midix.Models
+@using Midix.Enums
+
+@{
+    ViewData["Title"] = "Create Account — Medix";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <style>
+        /* Hide the site navbar on this page */
+        #navbar {
+            display: none;
+        }
+
+        /* ── Scrollable signup form ── */
+        .auth-right {
+            overflow-y: auto;
+            max-height: 100vh;
+            padding-bottom: 2rem;
+            justify-content: flex-start;
+        }
+
+        /* Password strength bar */
+        .strength-bar-wrap {
+            height: 4px;
+            background: var(--gray-200);
+            border-radius: var(--radius-full);
+            margin-top: 6px;
+            overflow: hidden;
+        }
+
+        .strength-bar {
+            height: 100%;
+            width: 0%;
+            border-radius: var(--radius-full);
+            transition: width 0.35s ease, background 0.35s ease;
+        }
+
+        .strength-label {
+            font-size: 11px;
+            margin-top: 3px;
+            color: var(--gray-500);
+        }
+
+        /* Date input fix */
+        input[type="date"] {
+            color: var(--gray-700);
+        }
+
+            input[type="date"]::-webkit-calendar-picker-indicator {
+                opacity: 0.5;
+                cursor: pointer;
+            }
+
+        /* Gender / select styling */
+        .input-wrapper select {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2394a3b8'%3E%3Cpath fill-rule='evenodd' d='M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 18px;
+            padding-right: 36px !important;
+        }
+
+        /* Validation summary */
+        .validation-summary {
+            background: var(--red-light);
+            border: 1px solid #fca5a5;
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            margin-bottom: 16px;
+        }
+
+            .validation-summary ul {
+                list-style: disc;
+                padding-left: 18px;
+            }
+
+            .validation-summary li {
+                font-size: 13px;
+                color: var(--red);
+                line-height: 1.7;
+            }
+
+        /* Field-level error */
+        .field-error {
+            font-size: 12px;
+            color: var(--red);
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+            .field-error::before {
+                content: "\f071";
+                font-family: "Font Awesome 6 Free";
+                font-weight: 900;
+                font-size: 10px;
+            }
+
+            /* Don't show the icon when there's no error message yet */
+            .field-error:empty::before {
+                content: none;
+            }
+
+        .input-wrapper.is-invalid input,
+        .input-wrapper.is-invalid select {
+            border-color: var(--red) !important;
+        }
+
+        /* Success banner (TempData) */
+        .success-banner {
+            background: var(--green-light);
+            border: 1px solid #86efac;
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            color: var(--green);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+    </style>
+}
+
+<div class="auth-container">
+
+    <!-- ── Left Panel ── -->
+    <div class="auth-left">
+        <div class="auth-brand">
+            <div class="logo-icon large"><i class="fas fa-heartbeat"></i></div>
+            <h2>Medix</h2>
+            <p>Your Health, Our Priority</p>
+        </div>
+        <div class="auth-features">
+            <div class="auth-feature-item"><i class="fas fa-check-circle"></i> Easy Online Booking</div>
+            <div class="auth-feature-item"><i class="fas fa-check-circle"></i> Access Medical Records</div>
+            <div class="auth-feature-item"><i class="fas fa-check-circle"></i> Digital Prescriptions</div>
+            <div class="auth-feature-item"><i class="fas fa-check-circle"></i> 24/7 Support</div>
+        </div>
+
+    </div>
+
+    <!-- ── Right Panel — Register Form ── -->
+    <div class="auth-right">
+        <a asp-controller="Home" asp-action="Index" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Home
+        </a>
+
+        <div class="auth-form active">
+            <h2>Create Account</h2>
+            <p class="auth-subtitle">Join Medix as a Patient</p>
+
+            @* ── TempData success ── *@
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="success-banner">
+                    <i class="fas fa-check-circle"></i>
+                    @TempData["SuccessMessage"]
+                </div>
+            }
+
+            <form asp-controller="Account" asp-action="Register" method="post" novalidate>
+                @Html.AntiForgeryToken()
+
+                @* ── First Name + Last Name ── *@
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="FirstName">First Name</label>
+                        <div class="input-wrapper @(ViewData.ModelState["FirstName"]?.Errors.Count > 0 ? "is-invalid" : "")">
+                            <i class="fas fa-user"></i>
+                            <input asp-for="FirstName" type="text" placeholder="First name" autocomplete="given-name" />
+                        </div>
+                        <span asp-validation-for="FirstName" class="field-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="LastName">Last Name</label>
+                        <div class="input-wrapper @(ViewData.ModelState["LastName"]?.Errors.Count > 0 ? "is-invalid" : "")">
+                            <i class="fas fa-user"></i>
+                            <input asp-for="LastName" type="text" placeholder="Last name" autocomplete="family-name" />
+                        </div>
+                        <span asp-validation-for="LastName" class="field-error"></span>
+                    </div>
+                </div>
+
+                @* ── Email ── *@
+                <div class="form-group">
+                    <label asp-for="Email">Email Address</label>
+                    <div class="input-wrapper @(ViewData.ModelState["Email"]?.Errors.Count > 0 ? "is-invalid" : "")">
+                        <i class="fas fa-envelope"></i>
+                        <input asp-for="Email" type="email" placeholder="your@email.com" autocomplete="email" />
+                    </div>
+                    <span asp-validation-for="Email" class="field-error"></span>
+                </div>
+
+                @* ── Phone Number ── *@
+                <div class="form-group">
+                    <label asp-for="PhoneNumber">Phone Number</label>
+                    <div class="input-wrapper @(ViewData.ModelState["PhoneNumber"]?.Errors.Count > 0 ? "is-invalid" : "")">
+                        <i class="fas fa-phone"></i>
+                        <input asp-for="PhoneNumber" type="tel" placeholder="+20 1XX XXX XXXX" autocomplete="tel" />
+                    </div>
+                    <span asp-validation-for="PhoneNumber" class="field-error"></span>
+                </div>
+
+                @* ── Date of Birth + Gender ── *@
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="DateOfBirth">Date of Birth</label>
+                        <div class="input-wrapper @(ViewData.ModelState["DateOfBirth"]?.Errors.Count > 0 ? "is-invalid" : "")">
+                            <i class="fas fa-birthday-cake"></i>
+                            <input asp-for="DateOfBirth" type="date"
+                                   min="@DateTime.Today.AddYears(-120).ToString("yyyy-MM-dd")"
+                                   max="@DateTime.Today.ToString("yyyy-MM-dd")"
+                                   value="@(Model.DateOfBirth == default ? "" : Model.DateOfBirth.ToString("yyyy-MM-dd"))" />
+                        </div>
+                        <span asp-validation-for="DateOfBirth" class="field-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Gender">Gender</label>
+                        <div class="input-wrapper @(ViewData.ModelState["Gender"]?.Errors.Count > 0 ? "is-invalid" : "")">
+                            <i class="fas fa-venus-mars"></i>
+                            <select asp-for="Gender" asp-items="Html.GetEnumSelectList<UserGender>()">
+                                <option value="" disabled selected>Select gender</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="Gender" class="field-error"></span>
+                    </div>
+                </div>
+
+                @* ── Password ── *@
+                <div class="form-group">
+                    <label asp-for="Password">Password</label>
+                    <div class="input-wrapper @(ViewData.ModelState["Password"]?.Errors.Count > 0 ? "is-invalid" : "")">
+                        <i class="fas fa-lock"></i>
+                        <input asp-for="Password"
+                               type="password"
+                               placeholder="Create a strong password (min. 8 chars)"
+                               id="signupPass"
+                               autocomplete="new-password"
+                               oninput="checkStrength(this.value)" />
+                        <i class="fas fa-eye toggle-pass" onclick="togglePass('signupPass')"></i>
+                    </div>
+                    <div class="strength-bar-wrap">
+                        <div class="strength-bar" id="strengthBar"></div>
+                    </div>
+                    <span class="strength-label" id="strengthLabel"></span>
+                    <span asp-validation-for="Password" class="field-error"></span>
+                </div>
+
+                @* ── Confirm Password ── *@
+                <div class="form-group">
+                    <label asp-for="ConfirmPassword">Confirm Password</label>
+                    <div class="input-wrapper @(ViewData.ModelState["ConfirmPassword"]?.Errors.Count > 0 ? "is-invalid" : "")">
+                        <i class="fas fa-lock"></i>
+                        <input asp-for="ConfirmPassword"
+                               type="password"
+                               placeholder="Re-enter your password"
+                               id="confirmPass"
+                               autocomplete="new-password" />
+                        <i class="fas fa-eye toggle-pass" onclick="togglePass('confirmPass')"></i>
+                    </div>
+                    <span asp-validation-for="ConfirmPassword" class="field-error"></span>
+                </div>
+
+                @* ── Terms & Conditions ── *@
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input asp-for="AgreeToTerms" type="checkbox" />
+                        I agree to the <a href="#" style="color:var(--blue)">Terms &amp; Conditions</a>
+                        and <a href="#" style="color:var(--blue)">Privacy Policy</a>
+                    </label>
+                    <span asp-validation-for="AgreeToTerms" class="field-error"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary full-width">
+                    Create Account <i class="fas fa-arrow-right"></i>
+                </button>
+
+                <p class="auth-switch">
+                    Already have an account?
+                    <a asp-controller="Account" asp-action="Login">Sign In</a>
+                </p>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function togglePass(id) {
+            const inp = document.getElementById(id);
+            const icon = inp.nextElementSibling;
+            if (inp.type === "password") {
+                inp.type = "text";
+                icon.classList.replace("fa-eye", "fa-eye-slash");
+            } else {
+                inp.type = "password";
+                icon.classList.replace("fa-eye-slash", "fa-eye");
+            }
+        }
+
+        function checkStrength(val) {
+            const bar = document.getElementById("strengthBar");
+            const label = document.getElementById("strengthLabel");
+            let score = 0;
+            if (val.length >= 8) score++;
+            if (/[A-Z]/.test(val)) score++;
+            if (/[0-9]/.test(val)) score++;
+            if (/[^A-Za-z0-9]/.test(val)) score++;
+
+            const map = [
+                { w: "0%", bg: "transparent", txt: "" },
+                { w: "25%", bg: "#dc2626", txt: "Weak" },
+                { w: "50%", bg: "#ea580c", txt: "Fair" },
+                { w: "75%", bg: "#ca8a04", txt: "Good" },
+                { w: "100%", bg: "#16a34a", txt: "Strong" },
+            ];
+            bar.style.width = map[score].w;
+            bar.style.background = map[score].bg;
+            label.textContent = map[score].txt;
+            label.style.color = map[score].bg;
+        }
+
+        window.addEventListener("scroll", () => {
+            const nb = document.getElementById("navbar");
+            if (nb) nb.classList.toggle("scrolled", window.scrollY > 20);
+        });
+    </script>
+}

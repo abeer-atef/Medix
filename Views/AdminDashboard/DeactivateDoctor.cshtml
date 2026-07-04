@@ -1,0 +1,276 @@
+﻿@model Midix.ViewModel.DeactivateDoctorViewModel
+
+@{
+    ViewData["Title"] = "Deactivate Doctor";
+}
+
+@section Styles {
+    <style>
+        #navbar {
+            display: none;
+        }
+
+        body {
+            background: var(--gray-50);
+        }
+
+        .confirm-card {
+            max-width: 560px;
+            margin: 3rem auto;
+            background: #fff;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+
+        .confirm-header {
+            background: linear-gradient(135deg, #e53e3e, #c53030);
+            padding: 1.75rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+            .confirm-header .icon-circle {
+                width: 48px;
+                height: 48px;
+                background: rgba(255,255,255,.2);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.3rem;
+                color: #fff;
+                flex-shrink: 0;
+            }
+
+            .confirm-header h2 {
+                color: #fff;
+                font-family: var(--font-heading);
+                font-weight: 700;
+                font-size: 1.2rem;
+                margin: 0;
+            }
+
+            .confirm-header p {
+                color: rgba(255,255,255,.85);
+                font-size: .85rem;
+                margin: .2rem 0 0;
+            }
+
+        .confirm-body {
+            padding: 1.75rem 2rem;
+        }
+
+        /* upcoming appointments alert */
+        .appt-alert {
+            display: flex;
+            gap: .75rem;
+            background: #fff8e1;
+            border: 1.5px solid #f6c90e;
+            border-radius: var(--radius-sm);
+            padding: 1rem 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+            .appt-alert .appt-icon {
+                font-size: 1.3rem;
+                color: #d97706;
+                margin-top: 2px;
+                flex-shrink: 0;
+            }
+
+            .appt-alert strong {
+                display: block;
+                color: var(--gray-900);
+                font-size: .95rem;
+            }
+
+            .appt-alert span {
+                color: var(--gray-600);
+                font-size: .85rem;
+            }
+
+        /* no upcoming */
+        .no-appt-note {
+            display: flex;
+            gap: .75rem;
+            background: #f0fff4;
+            border: 1.5px solid #9ae6b4;
+            border-radius: var(--radius-sm);
+            padding: 1rem 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+            .no-appt-note .appt-icon {
+                font-size: 1.3rem;
+                color: #38a169;
+                margin-top: 2px;
+            }
+
+            .no-appt-note strong {
+                display: block;
+                color: var(--gray-900);
+                font-size: .95rem;
+            }
+
+            .no-appt-note span {
+                color: var(--gray-600);
+                font-size: .85rem;
+            }
+
+        /* choice buttons */
+        .choice-btn {
+            display: flex;
+            align-items: flex-start;
+            gap: .9rem;
+            width: 100%;
+            padding: 1rem 1.2rem;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-sm);
+            background: #fff;
+            cursor: pointer;
+            text-align: left;
+            margin-bottom: .75rem;
+            transition: border-color .2s, background .2s;
+        }
+
+            .choice-btn:hover {
+                border-color: var(--blue);
+                background: var(--blue-light);
+            }
+
+            .choice-btn.danger:hover {
+                border-color: #e53e3e;
+                background: #fff5f5;
+            }
+
+            .choice-btn .choice-icon {
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: .95rem;
+                flex-shrink: 0;
+            }
+
+            .choice-btn.safe .choice-icon {
+                background: var(--blue-light);
+                color: var(--blue);
+            }
+
+            .choice-btn.danger .choice-icon {
+                background: #fff5f5;
+                color: #e53e3e;
+            }
+
+            .choice-btn strong {
+                display: block;
+                font-size: .9rem;
+                color: var(--gray-900);
+            }
+
+            .choice-btn span {
+                font-size: .8rem;
+                color: var(--gray-500);
+            }
+
+        .confirm-footer {
+            padding: 1rem 2rem;
+            border-top: 1px solid var(--gray-100);
+            display: flex;
+            justify-content: flex-end;
+        }
+    </style>
+}
+
+<div class="confirm-card">
+    <div class="confirm-header">
+        <div class="icon-circle"><i class="fas fa-user-slash"></i></div>
+        <div>
+            <h2>Deactivate Doctor</h2>
+            <p>@Model.DoctorName</p>
+        </div>
+    </div>
+
+    <div class="confirm-body">
+
+        @if (Model.UpcomingCount > 0)
+        {
+            <div class="appt-alert">
+                <i class="fas fa-exclamation-triangle appt-icon"></i>
+                <div>
+                    <strong>@Model.UpcomingCount upcoming appointment@(Model.UpcomingCount > 1 ? "s" : "") found</strong>
+                    <span>
+                        This doctor has scheduled appointments that haven't been completed yet.
+                        Choose what to do with them before deactivating.
+                    </span>
+                </div>
+            </div>
+
+            <p style="font-size:.9rem;color:var(--gray-700);margin-bottom:1rem;font-weight:600;">
+                What would you like to do with the upcoming appointments?
+            </p>
+
+            @* Option 1: Cancel appointments then deactivate *@
+            <form asp-controller="AdminDashboard" asp-action="DeactivateDoctor" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="userId" value="@Model.UserId" />
+                <input type="hidden" name="cancelAppointments" value="true" />
+                <button type="submit" class="choice-btn danger">
+                    <div class="choice-icon"><i class="fas fa-calendar-times"></i></div>
+                    <div>
+                        <strong>Cancel all @Model.UpcomingCount appointment@(Model.UpcomingCount > 1 ? "s" : "") &amp; deactivate</strong>
+                        <span>Patients will need to rebook with another doctor.</span>
+                    </div>
+                </button>
+            </form>
+
+            @* Option 2: Deactivate only, keep appointments *@
+            <form asp-controller="AdminDashboard" asp-action="DeactivateDoctor" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="userId" value="@Model.UserId" />
+                <input type="hidden" name="cancelAppointments" value="false" />
+                <button type="submit" class="choice-btn safe">
+                    <div class="choice-icon"><i class="fas fa-calendar-check"></i></div>
+                    <div>
+                        <strong>Keep appointments &amp; deactivate account only</strong>
+                        <span>Existing bookings remain — doctor won't be able to log in.</span>
+                    </div>
+                </button>
+            </form>
+        }
+        else
+        {
+            <div class="no-appt-note">
+                <i class="fas fa-check-circle appt-icon"></i>
+                <div>
+                    <strong>No upcoming appointments</strong>
+                    <span>This doctor has no pending or confirmed appointments. Safe to deactivate.</span>
+                </div>
+            </div>
+
+            <form asp-controller="AdminDashboard" asp-action="DeactivateDoctor" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="userId" value="@Model.UserId" />
+                <input type="hidden" name="cancelAppointments" value="false" />
+                <button type="submit" class="choice-btn danger">
+                    <div class="choice-icon"><i class="fas fa-user-slash"></i></div>
+                    <div>
+                        <strong>Confirm Deactivation</strong>
+                        <span>The doctor's account will be disabled immediately.</span>
+                    </div>
+                </button>
+            </form>
+        }
+
+    </div>
+
+    <div class="confirm-footer">
+        <a asp-controller="AdminDashboard" asp-action="Index" class="btn btn-outline">
+            <i class="fas fa-arrow-left"></i> Cancel
+        </a>
+    </div>
+</div>

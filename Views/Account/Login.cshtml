@@ -1,0 +1,187 @@
+﻿@model Midix.ViewModel.LoginViewModel
+@{
+    ViewData["Title"] = "Sign In — Medix";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <style>
+        /* ── Validation helpers ── */
+        .field-error {
+            color: var(--red);
+            font-size: 12px;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .input-wrapper input.input-invalid {
+            border-color: var(--red);
+        }
+
+            .input-wrapper input.input-invalid:focus {
+                box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+            }
+
+        /* ── Alert banner ── */
+        .alert-banner {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 13px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 13.5px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            border: 1px solid;
+        }
+
+        .alert-success {
+            background: var(--green-light);
+            color: var(--green);
+            border-color: rgba(22, 163, 74, 0.25);
+        }
+
+        .alert-error {
+            background: var(--red-light);
+            color: var(--red);
+            border-color: rgba(220, 38, 38, 0.22);
+        }
+    </style>
+}
+
+<div class="auth-container">
+
+    <!-- ═══════════════════════════════════════
+         LEFT PANEL
+    ════════════════════════════════════════ -->
+    <div class="auth-left">
+        <div class="auth-brand">
+            <div class="logo-icon large">
+                <i class="fas fa-heartbeat"></i>
+            </div>
+            <h2>Medix</h2>
+            <p>Your Health, Our Priority</p>
+        </div>
+
+        <div class="auth-features">
+            <div class="auth-feature-item">
+                <i class="fas fa-check-circle"></i> Easy Online Booking
+            </div>
+            <div class="auth-feature-item">
+                <i class="fas fa-check-circle"></i> Access Medical Records
+            </div>
+            <div class="auth-feature-item">
+                <i class="fas fa-check-circle"></i> Digital Prescriptions
+            </div>
+            <div class="auth-feature-item">
+                <i class="fas fa-check-circle"></i> 24/7 Support
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         RIGHT PANEL — LOGIN FORM
+    ════════════════════════════════════════ -->
+    <div class="auth-right">
+
+        <a href="/" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Home
+        </a>
+
+        <div class="auth-form active">
+
+            <h2>Welcome Back</h2>
+            <p class="auth-subtitle">Enter your credentials to access your account</p>
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert-banner alert-success">
+                    <i class="fas fa-check-circle" style="margin-top:2px;flex-shrink:0;"></i>
+                    <span>@TempData["SuccessMessage"]</span>
+                </div>
+            }
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert-banner alert-error">
+                    <i class="fas fa-exclamation-circle" style="margin-top:2px;flex-shrink:0;"></i>
+                    <div asp-validation-summary="ModelOnly"></div>
+                </div>
+            }
+
+            <form asp-action="Login" asp-controller="Account" method="post" novalidate>
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label asp-for="Email">Email Address</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input asp-for="Email"
+                               type="email"
+                               placeholder="you@example.com"
+                               autocomplete="email"
+                               class="@(ViewData.ModelState["Email"]?.Errors.Count > 0 ? "input-invalid" : "")" />
+                    </div>
+                    <span asp-validation-for="Email" class="field-error"></span>
+                </div>
+
+                <!-- Password -->
+                <div class="form-group">
+                    <label asp-for="Password">Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input asp-for="Password"
+                               type="password"
+                               placeholder="Enter your password"
+                               autocomplete="current-password"
+                               id="loginPass"
+                               class="@(ViewData.ModelState["Password"]?.Errors.Count > 0 ? "input-invalid" : "")" />
+                        <i class="fas fa-eye toggle-pass" onclick="togglePass('loginPass')" title="Show / hide password"></i>
+                    </div>
+                    <span asp-validation-for="Password" class="field-error"></span>
+                </div>
+
+                <!-- Remember me -->
+                <div class="form-options">
+                    <label class="checkbox-label">
+                        <input asp-for="RememberMe" type="checkbox" />
+                        Remember me
+                    </label>
+                    <a asp-action="ForgotPassword">Forgot your password?</a>
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" class="btn btn-primary full-width">
+                    Sign In &nbsp;<i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <p class="auth-switch">
+                Don't have an account?
+                <a asp-action="Register" asp-controller="Account">Create Account</a>
+            </p>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        function togglePass(id) {
+            var input = document.getElementById(id);
+            var icon = input.nextElementSibling;
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+    </script>
+}

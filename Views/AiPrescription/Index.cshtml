@@ -1,0 +1,446 @@
+@model Midix.ViewModel.UploadPrescriptionRequest
+
+@{
+    ViewData["Title"] = "AI Prescription Analysis";
+    ViewData["ActiveTab"] = "ai";
+}
+
+@section Styles {
+    <style>
+        body {
+            background: var(--gray-50);
+        }
+
+        /* ── Upload card ─────────────────────────────────────────────────── */
+        .upload-card {
+            max-width: 680px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 2.5rem;
+        }
+
+        /* ── Drop zone ───────────────────────────────────────────────────── */
+        .drop-zone {
+            border: 2.5px dashed var(--gray-200);
+            border-radius: var(--radius);
+            padding: 3rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background: var(--gray-50);
+            position: relative;
+        }
+
+            .drop-zone:hover,
+            .drop-zone.dragover {
+                border-color: var(--blue);
+                background: #eff6ff;
+            }
+
+            .drop-zone input[type="file"] {
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                height: 100%;
+                opacity: 0;
+                cursor: pointer;
+            }
+
+        .drop-zone-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: #eff6ff;
+            color: var(--blue);
+            font-size: 1.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.25rem;
+            transition: transform .25s ease;
+        }
+
+        .drop-zone:hover .drop-zone-icon {
+            transform: scale(1.1);
+        }
+
+        .drop-zone-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: .35rem;
+        }
+
+        .drop-zone-sub {
+            font-size: .85rem;
+            color: var(--gray-500);
+        }
+
+            .drop-zone-sub span {
+                color: var(--blue);
+                font-weight: 600;
+            }
+
+        /* ── Image preview ───────────────────────────────────────────────── */
+        #preview-wrapper {
+            display: none;
+            margin-top: 1.5rem;
+            border: 1.5px solid var(--gray-100);
+            border-radius: var(--radius);
+            overflow: hidden;
+            position: relative;
+        }
+
+        #preview-img {
+            width: 100%;
+            max-height: 320px;
+            object-fit: contain;
+            background: var(--gray-50);
+            display: block;
+        }
+
+        #preview-name {
+            padding: .6rem 1rem;
+            font-size: .8rem;
+            color: var(--gray-500);
+            background: #fff;
+            border-top: 1px solid var(--gray-100);
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        #remove-btn {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: #e53e3e;
+            cursor: pointer;
+            font-size: .8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: .25rem;
+            padding: 0;
+        }
+
+        /* ── Constraints list ────────────────────────────────────────────── */
+        .constraints {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 1.25rem 0;
+        }
+
+        .constraint-pill {
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+            font-size: .78rem;
+            color: var(--gray-600);
+            background: var(--gray-50);
+            border: 1px solid var(--gray-100);
+            border-radius: 99px;
+            padding: .3rem .8rem;
+        }
+
+            .constraint-pill i {
+                color: var(--blue);
+                font-size: .75rem;
+            }
+
+        /* ── Submit button ───────────────────────────────────────────────── */
+        .analyze-btn {
+            width: 100%;
+            border: none;
+            cursor: pointer;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            background: var(--blue);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: .6rem;
+            transition: .3s;
+            margin-top: 1.5rem;
+        }
+
+            .analyze-btn:hover:not(:disabled) {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 24px rgba(37,99,235,.3);
+            }
+
+            .analyze-btn:disabled {
+                opacity: .65;
+                cursor: not-allowed;
+                transform: none;
+            }
+
+        /* Spinner inside button */
+        .btn-spinner {
+            display: none;
+            width: 18px;
+            height: 18px;
+            border: 2.5px solid rgba(255,255,255,.4);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+        }
+
+        @@keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ── Validation summary ──────────────────────────────────────────── */
+        .validation-banner {
+            background: #fff5f5;
+            color: #e53e3e;
+            border: 1px solid #fed7d7;
+            border-radius: var(--radius-sm);
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.25rem;
+            font-size: .875rem;
+        }
+
+            .validation-banner ul {
+                margin: .4rem 0 0 1.25rem;
+                padding: 0;
+            }
+
+            .validation-banner li {
+                margin-bottom: .2rem;
+            }
+
+        /* ── Toast banners ───────────────────────────────────────────────── */
+        .page-banner {
+            padding: 12px 20px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 1rem;
+            font-size: .9rem;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+            .page-banner.success {
+                background: var(--green-light);
+                color: var(--green);
+            }
+
+            .page-banner.error {
+                background: #fff5f5;
+                color: #e53e3e;
+            }
+
+        /* ── AI tip card ─────────────────────────────────────────────────── */
+        .ai-tip {
+            margin-top: 1.5rem;
+            padding: 1rem 1.25rem;
+            background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--gray-100);
+            font-size: .82rem;
+            color: var(--gray-600);
+            display: flex;
+            gap: .75rem;
+            align-items: flex-start;
+        }
+
+            .ai-tip i {
+                color: var(--blue);
+                margin-top: .1rem;
+                flex-shrink: 0;
+            }
+
+        @@media (max-width: 640px) {
+            .upload-card {
+                padding: 1.5rem;
+            }
+
+            .drop-zone {
+                padding: 2rem 1rem;
+            }
+        }
+    </style>
+}
+
+@* ── TempData banners ──────────────────────────────────────────────────────── *@
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="page-banner success">
+        <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="page-banner error">
+        <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+    </div>
+}
+
+<div class="dashboard-layout">
+
+    @await Html.PartialAsync("~/Views/PatientDashboard/_PatientSidebar.cshtml", (Midix.ViewModel.PatientHeaderInfo)ViewData["PatientHeader"])
+    <main class="dashboard-main">
+
+        <div class="dashboard-header blue-header">
+            <div>
+                <h1><i class="fas fa-robot" style="margin-right:.5rem;"></i>AI Prescription Analysis</h1>
+                <p>Upload a prescription image and let our AI extract and explain every medication for you.</p>
+            </div>
+        </div>
+
+        <div class="upload-card">
+
+            @* ── Validation summary ──────────────────────────────────────── *@
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="validation-banner" role="alert" aria-live="assertive">
+                    <strong><i class="fas fa-exclamation-triangle"></i> Please fix the following:</strong>
+                    <div asp-validation-summary="All"></div>
+                </div>
+            }
+
+            @* ── Upload form ─────────────────────────────────────────────── *@
+            <form id="upload-form"
+                  asp-controller="AiPrescription"
+                  asp-action="Analyze"
+                  method="post"
+                  enctype="multipart/form-data">
+
+                @Html.AntiForgeryToken()
+
+                @* ── Drop zone ────────────────────────────────────────────── *@
+                <div class="drop-zone" id="drop-zone">
+                    <input type="file"
+                           id="PrescriptionImage"
+                           name="PrescriptionImage"
+                           accept="image/*"
+                           aria-label="Upload prescription image"
+                           aria-describedby="file-constraints" />
+
+                    <div class="drop-zone-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <div class="drop-zone-title">Drop your prescription image here</div>
+                    <div class="drop-zone-sub">
+                        or <span>click to browse</span> from your device
+                    </div>
+                </div>
+
+                @* ── Image preview ────────────────────────────────────────── *@
+                <div id="preview-wrapper">
+                    <img id="preview-img" src="#" alt="Prescription preview" />
+                    <div id="preview-name">
+                        <i class="fas fa-image"></i>
+                        <span id="file-name-label">filename.jpg</span>
+                        <button type="button" id="remove-btn">
+                            <i class="fas fa-times"></i> Remove
+                        </button>
+                    </div>
+                </div>
+
+                @* ── File constraint pills ────────────────────────────────── *@
+                <div class="constraints" id="file-constraints">
+                    <span class="constraint-pill"><i class="fas fa-check-circle"></i> JPEG, PNG, WebP, GIF</span>
+                    <span class="constraint-pill"><i class="fas fa-check-circle"></i> Max 10 MB</span>
+                    <span class="constraint-pill"><i class="fas fa-check-circle"></i> Clear, well-lit photo</span>
+                </div>
+
+                @* ── Submit button ────────────────────────────────────────── *@
+                <button type="submit" class="analyze-btn" id="analyze-btn" disabled>
+                    <span class="btn-spinner" id="btn-spinner"></span>
+                    <i class="fas fa-microscope" id="btn-icon"></i>
+                    <span id="btn-text">Analyse Prescription</span>
+                </button>
+
+            </form>
+
+            @* ── AI tip ──────────────────────────────────────────────────── *@
+            <div class="ai-tip">
+                <i class="fas fa-lightbulb"></i>
+                <span>
+                    <strong>Tip:</strong> For best results, photograph the prescription on a flat, well-lit surface.
+                    Ensure all text, dosage, and doctor's notes are clearly visible.
+                    The AI will extract each medication, its dosage, frequency, and provide Arabic instructions.
+                </span>
+            </div>
+
+        </div>
+
+    </main>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const fileInput = document.getElementById('PrescriptionImage');
+            const dropZone = document.getElementById('drop-zone');
+            const previewWrap = document.getElementById('preview-wrapper');
+            const previewImg = document.getElementById('preview-img');
+            const fileNameLbl = document.getElementById('file-name-label');
+            const removeBtn = document.getElementById('remove-btn');
+            const analyzeBtn = document.getElementById('analyze-btn');
+            const form = document.getElementById('upload-form');
+            const btnSpinner = document.getElementById('btn-spinner');
+            const btnIcon = document.getElementById('btn-icon');
+            const btnText = document.getElementById('btn-text');
+
+            // ── Drag-and-drop visual feedback ─────────────────────────────────
+            dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+            dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+            dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); });
+
+            // ── File selected ─────────────────────────────────────────────────
+            fileInput.addEventListener('change', function () {
+                const file = this.files[0];
+                if (!file) return;
+                showPreview(file);
+            });
+
+            function showPreview(file) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    previewImg.src = e.target.result;
+                    fileNameLbl.textContent = file.name + '  (' + formatBytes(file.size) + ')';
+                    previewWrap.style.display = 'block';
+                    dropZone.style.display = 'none';
+                    analyzeBtn.disabled = false;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            // ── Remove file ───────────────────────────────────────────────────
+            removeBtn.addEventListener('click', function () {
+                fileInput.value = '';
+                previewImg.src = '#';
+                previewWrap.style.display = 'none';
+                dropZone.style.display = 'block';
+                analyzeBtn.disabled = true;
+            });
+
+            // ── Loading state on submit ───────────────────────────────────────
+            form.addEventListener('submit', function () {
+                if (fileInput.files.length === 0) return; // let server validation catch it
+                analyzeBtn.disabled = true;
+                btnSpinner.style.display = 'block';
+                btnIcon.style.display = 'none';
+                btnText.textContent = 'Analysing… please wait';
+            });
+
+            // ── Utility ───────────────────────────────────────────────────────
+            function formatBytes(bytes) {
+                if (bytes < 1024) return bytes + ' B';
+                if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+                return (bytes / 1048576).toFixed(1) + ' MB';
+            }
+        })();
+    </script>
+}

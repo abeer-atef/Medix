@@ -1,0 +1,292 @@
+@model Midix.ViewModel.WritePrescriptionViewModel
+@using Midix.Models
+
+@{
+    ViewData["Title"] = "Write Prescription";
+}
+
+@section Styles {
+<style>
+    #navbar  { display: none; }
+    body     { background: var(--gray-50); }
+
+    .rx-page { display: grid; grid-template-columns: 300px 1fr; gap: 1.5rem;
+               max-width: 1200px; margin: 0 auto; padding: 1.5rem 1rem; }
+
+    /* Patient info panel */
+    .pt-panel .dash-card { padding: 1.5rem; }
+    .pt-avatar {
+        width: 64px; height: 64px; border-radius: 50%;
+        background: var(--teal-light); color: var(--teal);
+        font-size: 1.5rem; font-weight: 700;
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 1rem;
+    }
+    .pt-name  { text-align: center; font-family: var(--font-heading);
+                font-weight: 700; font-size: 1.1rem; color: var(--gray-900); }
+    .pt-meta  { text-align: center; font-size: .8rem; color: var(--gray-500); margin-bottom: 1.2rem; }
+
+    .pt-badge-row { display: flex; gap: .5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.2rem; }
+    .pt-badge {
+        padding: .25rem .75rem; border-radius: 2rem;
+        font-size: .75rem; font-weight: 700;
+    }
+    .pt-badge.blood { background: #fff5f5; color: #e53e3e; }
+    .pt-badge.age   { background: var(--blue-light); color: var(--blue); }
+
+    .prev-visits-title {
+        font-size: .8rem; font-weight: 700; color: var(--gray-500);
+        text-transform: uppercase; letter-spacing: .06em;
+        margin: 1rem 0 .6rem;
+    }
+    .visit-row {
+        display: flex; align-items: flex-start; gap: .75rem;
+        padding: .6rem 0; border-bottom: 1px solid var(--gray-100);
+        font-size: .8rem; color: var(--gray-600);
+    }
+    .visit-date { color: var(--gray-400); min-width: 70px; }
+
+    /* RX writer */
+    .rx-header-bar {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 1.5rem; flex-wrap: wrap; gap: .75rem;
+    }
+    .rx-symbol-lg {
+        font-size: 2.5rem; font-weight: 900; color: var(--teal);
+        font-family: serif; line-height: 1;
+    }
+    .rx-meta { font-size: .8rem; color: var(--gray-500); }
+
+    .form-label {
+        display: block; font-size: .8rem; font-weight: 700;
+        color: var(--gray-600); text-transform: uppercase;
+        letter-spacing: .05em; margin-bottom: .4rem;
+    }
+    .rx-textarea {
+        width: 100%; border: 1.5px solid var(--gray-200);
+        border-radius: var(--radius-sm); padding: .75rem;
+        font-size: .9rem; font-family: inherit; resize: vertical;
+        transition: border-color .2s; min-height: 80px;
+        box-sizing: border-box;
+    }
+    .rx-textarea:focus { outline: none; border-color: var(--teal); }
+
+    /* Medicine rows */
+    .med-row {
+        display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto;
+        gap: .75rem; align-items: end;
+        padding: .75rem; background: var(--gray-50);
+        border-radius: var(--radius-sm); margin-bottom: .6rem;
+    }
+    .med-input {
+        width: 100%; border: 1.5px solid var(--gray-200);
+        border-radius: var(--radius-sm); padding: .5rem .75rem;
+        font-size: .875rem; font-family: inherit; background: #fff;
+        transition: border-color .2s; box-sizing: border-box;
+    }
+    .med-input:focus { outline: none; border-color: var(--teal); }
+    .med-remove {
+        width: 34px; height: 34px; border: none;
+        background: #fff0f0; color: #e53e3e;
+        border-radius: var(--radius-sm); cursor: pointer;
+        font-size: 1rem; display: flex; align-items: center; justify-content: center;
+        transition: .15s;
+    }
+    .med-remove:hover { background: #e53e3e; color: #fff; }
+
+    @@media (max-width: 768px) {
+        .rx-page { grid-template-columns: 1fr; }
+        .med-row { grid-template-columns: 1fr 1fr; }
+    }
+</style>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div style="max-width:1200px;margin:1rem auto 0;padding:0 1rem;">
+        <div style="background:#fff5f5;color:#e53e3e;padding:12px 20px;border-radius:var(--radius-sm);">
+            <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+        </div>
+    </div>
+}
+
+<div class="rx-page">
+
+    @* ── Patient Info Panel ── *@
+    <aside class="pt-panel">
+        <a asp-controller="DoctorDashboard" asp-action="Index"
+           style="display:inline-flex;align-items:center;gap:6px;color:var(--gray-500);font-size:.85rem;text-decoration:none;margin-bottom:1rem;">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+
+        <div class="dash-card">
+            <div class="pt-avatar">@Model.PatientInitials</div>
+            <div class="pt-name">@Model.PatientName</div>
+            <div class="pt-meta">Appointment #@Model.AppointmentId</div>
+
+            <div class="pt-badge-row">
+                <span class="pt-badge age">@Model.PatientAge yrs</span>
+                <span class="pt-badge blood">@(string.IsNullOrEmpty(Model.BloodType) ? "—" : Model.BloodType)</span>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(Model.ExistingDiagnosis))
+            {
+                <div style="background:var(--blue-light);border-radius:var(--radius-sm);padding:.75rem;font-size:.8rem;color:var(--blue);margin-bottom:1rem;">
+                    <strong>Previous diagnosis:</strong><br />@Model.ExistingDiagnosis
+                </div>
+            }
+
+            <div class="prev-visits-title">Previous Visits</div>
+            @if (!Model.PreviousVisits.Any())
+            {
+                <p style="font-size:.8rem;color:var(--gray-400);">No previous visits.</p>
+            }
+            else
+            {
+                @foreach (var v in Model.PreviousVisits)
+                {
+                    <div class="visit-row">
+                        <span class="visit-date">@v.Date.ToString("MMM d")</span>
+                        <span>
+                            @v.Diagnosis
+                            @if (v.RxCount > 0)
+                            {
+                                <span style="color:var(--teal);font-weight:700;margin-left:4px;">· @v.RxCount Rx</span>
+                            }
+                        </span>
+                    </div>
+                }
+            }
+        </div>
+    </aside>
+
+    @* ── Prescription Writer (real form POST) ── *@
+    <section>
+        <form asp-controller="DoctorDashboard" asp-action="SavePrescription" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="AppointmentId" value="@Model.AppointmentId" />
+
+            <div class="dash-card" style="padding:1.75rem;">
+
+                <div class="rx-header-bar">
+                    <div style="display:flex;align-items:center;gap:1rem;">
+                        <div class="rx-symbol-lg">℞</div>
+                        <div>
+                            <div style="font-family:var(--font-heading);font-weight:700;font-size:1.1rem;color:var(--gray-900);">
+                                New Prescription
+                            </div>
+                            <div class="rx-meta">
+                                @Model.DoctorName · @Model.Specialization<br />
+                                @DateTime.Now.ToString("MMMM d, yyyy")
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+                        <button class="btn btn-teal" type="submit">
+                            <i class="fas fa-file-prescription"></i> Issue &amp; Complete
+                        </button>
+                    </div>
+                </div>
+
+                @* Diagnosis *@
+                <div style="margin-bottom:1.25rem;">
+                    <label class="form-label" for="Diagnosis">Chief Complaint / Diagnosis <span style="color:#e53e3e;">*</span></label>
+                    <textarea id="Diagnosis" name="Diagnosis" class="rx-textarea" rows="3"
+                              placeholder="Enter diagnosis and chief complaint…" required>@Model.ExistingDiagnosis</textarea>
+                </div>
+
+                @* Medicines *@
+                <div style="margin-bottom:1.25rem;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;">
+                        <label class="form-label" style="margin:0;">Medications</label>
+                        <button type="button" class="btn-sm btn-teal" id="addMedBtn">
+                            <i class="fas fa-plus"></i> Add Medicine
+                        </button>
+                    </div>
+                    <div id="medList">
+                        <div class="med-row">
+                            <div>
+                                <label class="form-label">Medicine</label>
+                                <input type="text" class="med-input" name="MedicineNames" placeholder="Medicine name" />
+                            </div>
+                            <div>
+                                <label class="form-label">Dosage</label>
+                                <input type="text" class="med-input" name="MedicineDosages" placeholder="e.g. 500mg" />
+                            </div>
+                            <div>
+                                <label class="form-label">Frequency</label>
+                                <select class="med-input" name="MedicineFrequencies">
+                                    <option>Once daily</option>
+                                    <option>Twice daily</option>
+                                    <option>Three times daily</option>
+                                    <option>Four times daily</option>
+                                    <option>At bedtime</option>
+                                    <option>As needed</option>
+                                    <option>Every 8 hours</option>
+                                    <option>Every 6 hours</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="form-label">Duration</label>
+                                <input type="text" class="med-input" name="MedicineDurations" placeholder="e.g. 7 days" />
+                            </div>
+                            <button type="button" class="med-remove" onclick="this.closest('.med-row').remove()" title="Remove">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                @* Notes *@
+                <div style="margin-bottom:1.25rem;">
+                    <label class="form-label" for="Notes">Doctor's Notes / Follow-up</label>
+                    <textarea id="Notes" name="Notes" class="rx-textarea" rows="3"
+                              placeholder="Follow-up instructions, lifestyle advice, referrals…"></textarea>
+                </div>
+
+            </div>
+        </form>
+    </section>
+</div>
+
+@section Scripts {
+<script>
+    // Cosmetic only: adds another row of inputs to the real <form>.
+    // The page submits via a normal HTML form POST — no fetch/AJAX here.
+    document.getElementById('addMedBtn').addEventListener('click', function () {
+        const list = document.getElementById('medList');
+        const row = document.createElement('div');
+        row.className = 'med-row';
+        row.innerHTML = `
+            <div>
+                <label class="form-label">Medicine</label>
+                <input type="text" class="med-input" name="MedicineNames" placeholder="Medicine name" />
+            </div>
+            <div>
+                <label class="form-label">Dosage</label>
+                <input type="text" class="med-input" name="MedicineDosages" placeholder="e.g. 500mg" />
+            </div>
+            <div>
+                <label class="form-label">Frequency</label>
+                <select class="med-input" name="MedicineFrequencies">
+                    <option>Once daily</option>
+                    <option>Twice daily</option>
+                    <option>Three times daily</option>
+                    <option>Four times daily</option>
+                    <option>At bedtime</option>
+                    <option>As needed</option>
+                    <option>Every 8 hours</option>
+                    <option>Every 6 hours</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label">Duration</label>
+                <input type="text" class="med-input" name="MedicineDurations" placeholder="e.g. 7 days" />
+            </div>
+            <button type="button" class="med-remove" onclick="this.closest('.med-row').remove()" title="Remove">
+                <i class="fas fa-trash"></i>
+            </button>`;
+        list.appendChild(row);
+    });
+</script>
+}

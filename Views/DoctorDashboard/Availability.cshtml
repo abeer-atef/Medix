@@ -1,0 +1,93 @@
+@model Midix.ViewModel.DoctorAvailabilityViewModel
+
+@{
+    ViewData["Title"]     = "Manage Availability";
+    ViewData["ActiveTab"] = "availability";
+}
+
+@section Styles {
+<style>
+    #navbar { display: none; }
+    body     { background: var(--gray-50); }
+    .sidebar-link.logout-btn {
+        width: 100%; background: none; border: none; cursor: pointer; text-align: left;
+        display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+        border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; color: var(--gray-600);
+        transition: var(--transition);
+    }
+    .sidebar-link.logout-btn:hover { background: #fff0f0; color: #e53e3e; }
+
+    .day-list { display: flex; flex-direction: column; }
+    .day-row {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 1rem 1.25rem; border-top: 1px solid var(--gray-100);
+    }
+    .day-row:first-child { border-top: none; }
+    .day-name { font-weight: 600; color: var(--gray-900); }
+    .day-sub  { font-size: .8rem; color: var(--gray-500); }
+    .slot-pill {
+        display: inline-flex; align-items: center; gap: .3rem;
+        background: var(--teal-light); color: var(--teal);
+        padding: .25rem .75rem; border-radius: 2rem; font-size: .8rem; font-weight: 600;
+    }
+    .slot-pill.empty { background: var(--gray-100); color: var(--gray-400); }
+</style>
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div style="background:var(--green-light);color:var(--green);padding:12px 20px;border-radius:var(--radius-sm);margin-bottom:16px;">
+        <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div style="background:#fff5f5;color:#e53e3e;padding:12px 20px;border-radius:var(--radius-sm);margin-bottom:16px;">
+        <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+    </div>
+}
+
+<div class="dashboard-layout">
+
+    @await Html.PartialAsync("_DoctorSidebar", (Midix.ViewModel.DoctorHeaderInfo)Model)
+
+    <main class="dashboard-main">
+
+        <div class="dashboard-header teal-header">
+            <div>
+                <h1>Manage Availability</h1>
+                <p>Set your working hours for the next 14 days</p>
+            </div>
+        </div>
+
+        <div class="dash-card">
+            <div class="day-list">
+                @foreach (var day in Model.Days)
+                {
+                    <div class="day-row">
+                        <div>
+                            <div class="day-name">@day.Date.ToString("dddd, MMM d")</div>
+                            <div class="day-sub">@(day.Date.Date == DateTime.UtcNow.Date ? "Today" : day.Date.ToString("yyyy"))</div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:1rem;">
+                            @if (day.SlotCount > 0)
+                            {
+                                <span class="slot-pill"><i class="fas fa-clock"></i> @day.SlotCount slot@(day.SlotCount == 1 ? "" : "s")</span>
+                            }
+                            else
+                            {
+                                <span class="slot-pill empty">Not set</span>
+                            }
+                            <a asp-controller="DoctorDashboard" asp-action="EditAvailabilityDay"
+                               asp-route-date="@day.DateKey"
+                               class="btn-sm btn-teal" style="text-decoration:none;">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+    </main>
+</div>

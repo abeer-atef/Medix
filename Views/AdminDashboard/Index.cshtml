@@ -1,0 +1,145 @@
+@model Midix.ViewModel.AdminDashboardViewModel
+@using Midix.Models
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    ViewData["ActiveTab"] = "overview";
+}
+
+@section Styles {
+    <style>
+        #navbar { display: none; }
+        body { background: var(--gray-50); }
+
+        .btn-icon {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 32px; height: 32px; border-radius: var(--radius-sm);
+            border: none; cursor: pointer; font-size: 13px;
+            text-decoration: none; transition: var(--transition);
+        }
+        .btn-edit       { background: var(--blue-light); color: var(--blue); }
+        .btn-edit:hover { background: var(--blue); color: #fff; }
+        .btn-deactivate       { background: #fff0f0; color: #e53e3e; }
+        .btn-deactivate:hover { background: #e53e3e; color: #fff; }
+        .btn-activate       { background: #f0fff4; color: #38a169; }
+        .btn-activate:hover { background: #38a169; color: #fff; }
+    </style>
+}
+
+<div class="dashboard-layout">
+
+    <!-- ══════════════ SIDEBAR ══════════════ -->
+    @await Html.PartialAsync("_AdminSidebar")
+
+    <!-- ══════════════ MAIN CONTENT ══════════════ -->
+    <main class="dashboard-main">
+
+        <div class="dashboard-header admin-header">
+            <div>
+                <h1>Admin Control Center</h1>
+                <p>Full system overview and management dashboard</p>
+            </div>
+            <div class="header-actions">
+                <span class="date-badge">
+                    <i class="fas fa-calendar"></i>
+                    @DateTime.Now.ToString("MMM dd, yyyy")
+                </span>
+            </div>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-card blue">
+                <div class="stat-icon"><i class="fas fa-user-md"></i></div>
+                <div class="stat-info">
+                    <span class="stat-value">@Model.TotalDoctors</span>
+                    <span class="stat-label">Total Doctors</span>
+                </div>
+            </div>
+            <div class="stat-card green">
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
+                <div class="stat-info">
+                    <span class="stat-value">@Model.TotalPatients.ToString("N0")</span>
+                    <span class="stat-label">Total Patients</span>
+                </div>
+            </div>
+            <div class="stat-card orange">
+                <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
+                <div class="stat-info">
+                    <span class="stat-value">@Model.TodayAppointments</span>
+                    <span class="stat-label">Today's Appointments</span>
+                </div>
+            </div>
+            <div class="stat-card purple">
+                <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
+                <div class="stat-info">
+                    <span class="stat-value">$@Model.MonthlyRevenue.ToString("N0")</span>
+                    <span class="stat-label">This Month's Revenue</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="dash-grid-2">
+            <!-- Revenue Bar Chart -->
+            <div class="dash-card">
+                <div class="card-header"><h3>Revenue Chart (Last 6 Months)</h3></div>
+                <div class="chart-container">
+                    <div class="bar-chart">
+                        @foreach (var r in Model.RevenueChart)
+                        {
+                            <div class="bar-group">
+                                <div class="bar @(r.IsCurrentMonth ? "active-bar" : "")"
+                                     style="height:@(r.HeightPercent)%">
+                                    <span class="bar-val">$@((r.Amount / 1000).ToString("0"))K</span>
+                                </div>
+                                <span class="bar-label">@r.Month</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appointments by Specialization -->
+            <div class="dash-card">
+                <div class="card-header"><h3>Appointments by Department</h3></div>
+                <div class="dept-stats">
+                    @for (int i = 0; i < Model.AppointmentsBySpec.Count; i++)
+                    {
+                        var spec = Model.AppointmentsBySpec[i];
+                        <div class="dept-stat-item">
+                            <div class="dept-stat-info">
+                                <span>@spec.Name</span>
+                                <strong>@spec.Count</strong>
+                            </div>
+                            <div class="dept-progress-bar">
+                                <div class="dept-progress"
+                                     style="width:@(spec.WidthPercent)%;background:@spec.Color"></div>
+                            </div>
+                        </div>
+                    }
+                    @if (!Model.AppointmentsBySpec.Any())
+                    {
+                        <p style="color:var(--gray-400);font-size:14px;">No appointment data yet.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="dash-card" style="margin-top:1.5rem;padding:1.5rem;">
+            <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+                <a asp-controller="AdminDashboard" asp-action="Staff" class="btn btn-outline">
+                    <i class="fas fa-user-md"></i> Manage Staff
+                </a>
+                <a asp-controller="AdminDashboard" asp-action="Appointments" class="btn btn-outline">
+                    <i class="fas fa-calendar-alt"></i> View Appointments
+                </a>
+                <a asp-controller="AdminDashboard" asp-action="Financial" class="btn btn-outline">
+                    <i class="fas fa-chart-line"></i> Financial Reports
+                </a>
+                <a asp-controller="AdminDashboard" asp-action="AllUsers" class="btn btn-outline">
+                    <i class="fas fa-users"></i> All Users
+                </a>
+            </div>
+        </div>
+
+    </main>
+</div>

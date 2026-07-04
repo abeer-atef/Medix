@@ -1,0 +1,148 @@
+@model Midix.ViewModel.AllUsersViewModel
+
+@{
+    ViewData["Title"] = "Patients";
+    ViewData["UsersTab"] = "patients";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/users-dashboard.css" />
+    <style>
+        .user-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar-mini-img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #e5e7eb;
+            flex-shrink: 0;
+        }
+
+        .avatar-mini {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+    </style>
+}
+
+<div class="page-header">
+    <div class="header-content">
+        <div class="header-icon">
+            <i class="fas fa-heartbeat"></i>
+        </div>
+        <div>
+            <h1>All Patients</h1>
+            <p class="page-subtitle">Manage patient records and appointments.</p>
+        </div>
+    </div>
+    <a asp-controller="AdminDashboard" asp-action="Index" class="btn-dashboard">
+        <i class="fas fa-arrow-left"></i> Dashboard
+    </a>
+</div>
+
+@await Html.PartialAsync("_UsersTabsNav")
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-label">Total Patients</div>
+        <div class="stat-number">@Model.PatientsPagination.TotalItems</div>
+    </div>
+</div>
+
+<div class="dash-card">
+    <div class="appointments-table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Blood Type</th>
+                    <th>Appointments</th>
+                    <th>Status</th>
+                    <th>Joined</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model.Patients)
+                {
+                    <tr>
+                        <td>
+                            <div class="user-cell">
+                                @if (!string.IsNullOrEmpty(p.Picture))
+                                {
+                                    <img src="@p.Picture" class="avatar-mini-img" />
+                                }
+                                else
+                                {
+                                    <div class="avatar-mini avatar-patient">@p.Initials</div>
+                                }
+                                <span>@p.FullName</span>
+                            </div>
+                        </td>
+                        <td>@p.Email</td>
+                        <td>@(string.IsNullOrEmpty(p.PhoneNumber) ? "—" : p.PhoneNumber)</td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(p.BloodType))
+                            {
+                                <span class="badge badge-confirmed">@p.BloodType</span>
+                            }
+                            else
+                            {
+                                <span>—</span>
+                            }
+                        </td>
+                        <td><span class="counter-badge">@p.TotalAppointments</span></td>
+                        <td>
+                            @if (p.IsActive)
+                            {
+                                <span class="badge badge-active">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-inactive">Inactive</span>
+                            }
+                        </td>
+                        <td>@p.CreatedAt.ToString("MMM dd, yyyy")</td>
+                    </tr>
+                }
+                @if (!Model.Patients.Any())
+                {
+                    <tr><td colspan="7" style="text-align:center;color:var(--gray-400);padding:2rem;">No patients found.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @{
+        var pg = Model.PatientsPagination;
+        int start = Math.Max(1, pg.CurrentPage - 2);
+        int end = Math.Min(pg.TotalPages, pg.CurrentPage + 2);
+    }
+    @if (pg.TotalPages > 1)
+    {
+        <div class="pagination-bar">
+            <span>Page @pg.CurrentPage of @pg.TotalPages (@pg.TotalItems patients)</span>
+            <div class="pagination-controls">
+                <a asp-action="AllPatients" asp-route-page="1" asp-route-pageSize="@pg.PageSize" class="page-btn @(!pg.HasPrevious ? "disabled" : "")"><i class="fas fa-angle-double-left"></i></a>
+                <a asp-action="AllPatients" asp-route-page="@(pg.CurrentPage - 1)" asp-route-pageSize="@pg.PageSize" class="page-btn @(!pg.HasPrevious ? "disabled" : "")"><i class="fas fa-angle-left"></i></a>
+                @for (int p2 = start; p2 <= end; p2++)
+                {
+                    <a asp-action="AllPatients" asp-route-page="@p2" asp-route-pageSize="@pg.PageSize" class="page-btn @(p2 == pg.CurrentPage ? "current" : "")">@p2</a>
+                }
+                <a asp-action="AllPatients" asp-route-page="@(pg.CurrentPage + 1)" asp-route-pageSize="@pg.PageSize" class="page-btn @(!pg.HasNext ? "disabled" : "")"><i class="fas fa-angle-right"></i></a>
+                <a asp-action="AllPatients" asp-route-page="@pg.TotalPages" asp-route-pageSize="@pg.PageSize" class="page-btn @(!pg.HasNext ? "disabled" : "")"><i class="fas fa-angle-double-right"></i></a>
+            </div>
+        </div>
+    }
+</div>

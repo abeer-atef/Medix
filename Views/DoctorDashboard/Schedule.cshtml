@@ -1,0 +1,228 @@
+@model Midix.ViewModel.DoctorScheduleViewModel
+@using Midix.Models
+@using Midix.Enums
+
+@{
+    ViewData["Title"] = "Today's Schedule";
+    ViewData["ActiveTab"] = "schedule";
+}
+
+@section Styles {
+    <style>
+        #navbar {
+            display: none;
+        }
+
+        body {
+            background: var(--gray-50);
+        }
+
+        .sidebar-link.logout-btn {
+            width: 100%;
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--gray-600);
+            transition: var(--transition);
+        }
+
+            .sidebar-link.logout-btn:hover {
+                background: #fff0f0;
+                color: #e53e3e;
+            }
+    </style>
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div style="background:var(--green-light);color:var(--green);padding:12px 20px;border-radius:var(--radius-sm);margin-bottom:16px;">
+        <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div style="background:#fff5f5;color:#e53e3e;padding:12px 20px;border-radius:var(--radius-sm);margin-bottom:16px;">
+        <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+    </div>
+}
+
+<div class="dashboard-layout">
+    @await Html.PartialAsync("_DoctorSidebar", (Midix.ViewModel.DoctorHeaderInfo)Model)
+
+    <main class="dashboard-main">
+        <div class="dashboard-header teal-header">
+            <div>
+                <h1>Today's Schedule</h1>
+                <p>@DateTime.Now.ToString("dddd, MMMM d, yyyy")</p>
+            </div>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-card teal">
+                <div class="stat-icon"><i class="fas fa-user-injured"></i></div>
+                <div class="stat-info">
+                    <span class="stat-value">@Model.TodayTotal</span>
+                    <span class="stat-label">Today's Patients</span>
+                </div>
+            </div>
+            <div class="stat-card blue">
+                <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-info">
+                    <span class="stat-value">@Model.TodayCompleted</span>
+                    <span class="stat-label">Completed</span>
+                </div>
+            </div>
+            <div class="stat-card orange">
+                <div class="stat-icon"><i class="fas fa-hourglass-half"></i></div>
+                <div class="stat-info">
+                    <span class="stat-value">@Model.TodayRemaining</span>
+                    <span class="stat-label">Remaining</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="dash-card">
+            <div class="card-header">
+                <h3>Patient Queue</h3>
+                <div class="queue-legend">
+                    <span><span class="legend-dot green"></span> Done</span>
+                    <span><span class="legend-dot blue"></span> Confirmed</span>
+                    <span><span class="legend-dot orange"></span> Pending</span>
+                </div>
+            </div>
+
+            @if (!Model.TodayQueue.Any())
+            {
+                <div style="text-align:center;padding:40px;color:var(--gray-400);">
+                    <i class="fas fa-calendar-times" style="font-size:40px;display:block;margin-bottom:12px;"></i>
+                    No appointments scheduled for today.
+                </div>
+            }
+            else
+            {
+                <div class="patient-queue">
+                    @foreach (var apt in Model.TodayQueue)
+                    {
+                        var itemClass = apt.State == AppointmentState.Done ? "completed"
+                        : apt.State == AppointmentState.InProgress ? "in-progress-active"
+                        : apt.State == AppointmentState.Confirmed ? "in-progress"
+                        : "waiting";
+
+                    var avatarClass = apt.State == AppointmentState.InProgress || apt.State == AppointmentState.Confirmed ? "current"
+                : apt.State == AppointmentState.Pending ? "waiting-av" 
+                : "";
+
+                        var badgeClass = apt.State == AppointmentState.Done ? "badge-completed"
+                        : apt.State == AppointmentState.InProgress ? "badge-warning"
+                        : apt.State == AppointmentState.Confirmed ? "badge-confirmed"
+                        : apt.State == AppointmentState.Cancelled ? "badge-danger"
+                        : "badge-pending";
+
+                        <div class="queue-item @itemClass">
+                            <div class="queue-number">@apt.QueueNumber.ToString("D2")</div>
+                            <div class="queue-avatar @avatarClass">@apt.Initials</div>
+                            <div class="queue-info">
+                                <strong>@apt.PatientName</strong>
+                                <span>@apt.TimeLabel — @apt.Reason</span>
+                            </div>
+                            <div class="queue-status">
+                                <span class="badge @badgeClass">@apt.State</span>
+                            </div>
+
+                            @if (apt.State == AppointmentState.Done)
+                            {
+                                <span style="font-size:12px;color:var(--gray-400);"><i class="fas fa-check"></i> Done</span>
+                            }
+                            else if (apt.State == AppointmentState.InProgress)
+                            {
+                                <a asp-controller="DoctorDashboard" asp-action="WritePrescription" asp-route-appointmentId="@apt.Id"
+                                   class="btn-sm btn-warning">
+                                    <i class="fas fa-edit"></i> Continue Rx
+                                </a>
+                            }
+                            else if (apt.State == AppointmentState.Confirmed || (apt.State == AppointmentState.Pending && apt.PaymentMethod != PaymentMethod.Online))
+                            {
+                                <form asp-controller="DoctorDashboard" asp-action="StartAppointment" method="post" style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="appointmentId" value="@apt.Id" />
+                                    <button type="submit" class="btn-sm btn-teal">
+                                        <i class="fas fa-play"></i> Start &amp; Write Rx
+                                    </button>
+                                </form>
+                            }
+                            else if (apt.State == AppointmentState.Pending)
+                            {
+                                <form asp-controller="DoctorDashboard" asp-action="CancelAppointment"
+                                      method="post" style="display:inline;" onsubmit="return confirm('Cancel this appointment?');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="appointmentId" value="@apt.Id" />
+                                    <button type="submit" class="btn-sm btn-outline" style="color:#e53e3e;border-color:#e53e3e;">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+<script>
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/appointmentHub")
+        .withAutomaticReconnect()
+        .build();
+
+    connection.on("NewAppointmentBooked", function (data) {
+        addNewPatientToQueue(data);
+        updateStatsCounters();
+    });
+
+    connection.start().catch(err => console.error(err.toString()));
+
+    function addNewPatientToQueue(apt) {
+        const queueContainer = document.querySelector(".patient-queue");
+        if (!queueContainer) return;
+
+        const emptyState = queueContainer.querySelector(".empty-queue-message");
+        if (emptyState) emptyState.remove();
+
+        const existingRows = queueContainer.querySelectorAll(".queue-item").length;
+        const queueNumber = String(existingRows + 1).padStart(2, "0");
+
+        const row = document.createElement("div");
+        row.className = "queue-item waiting"; 
+        row.innerHTML = `
+                <div class="queue-number">${queueNumber}</div>
+                <div class="queue-avatar waiting-av">${apt.initials}</div>
+                <div class="queue-info">
+                    <strong>${apt.patientName}</strong>
+                    <span>${apt.timeLabel} — ${apt.reason}</span>
+                </div>
+                <div class="queue-status">
+                    <span class="badge badge-pending">${apt.state}</span>
+                </div>
+            `;
+
+        queueContainer.appendChild(row);
+    }
+
+    function updateStatsCounters() {
+        const totalEl = document.querySelector(".stat-card.teal .stat-value");
+        const remainingEl = document.querySelector(".stat-card.orange .stat-value");
+
+        if (totalEl) totalEl.textContent = parseInt(totalEl.textContent) + 1;
+        if (remainingEl) remainingEl.textContent = parseInt(remainingEl.textContent) + 1;
+    }
+</script>

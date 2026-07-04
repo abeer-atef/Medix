@@ -1,0 +1,46 @@
+@{
+    var active = ViewData["ActiveTab"]?.ToString() ?? "overview";
+}
+<aside class="sidebar admin-sidebar">
+    <div class="sidebar-brand admin-brand">
+        <div class="logo-icon small orange-icon"><i class="fas fa-shield-alt"></i></div>
+        <span>Admin Panel</span>
+    </div>
+
+    <div class="sidebar-user">
+        <div class="user-avatar orange-avatar">AD</div>
+        <div class="user-info">
+            <strong>@User.Identity!.Name</strong>
+            <span>Super Administrator</span>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <a asp-controller="AdminDashboard" asp-action="Index"
+           class="sidebar-link @(active == "overview" ? "active" : "")">
+            <i class="fas fa-chart-pie"></i> Overview
+        </a>
+        <a asp-controller="AdminDashboard" asp-action="Staff"
+           class="sidebar-link @(active == "staff" ? "active" : "")">
+            <i class="fas fa-user-md"></i> Staff Management
+        </a>
+        <a asp-controller="AdminDashboard" asp-action="Appointments"
+           class="sidebar-link @(active == "appointments" ? "active" : "")">
+            <i class="fas fa-calendar-alt"></i> All Appointments
+        </a>
+        <a asp-controller="AdminDashboard" asp-action="Financial"
+           class="sidebar-link @(active == "financial" ? "active" : "")">
+            <i class="fas fa-chart-line"></i> Financial Reports
+        </a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <form asp-controller="Account" asp-action="Logout" method="post">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="sidebar-link logout"
+                    style="width:100%;background:none;border:none;cursor:pointer;text-align:left;">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </form>
+    </div>
+</aside>

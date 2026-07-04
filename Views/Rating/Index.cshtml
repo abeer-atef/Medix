@@ -1,0 +1,750 @@
+﻿@model IEnumerable<Midix.ViewModel.RateableDoctorVM>
+@{
+    ViewData["Title"] = "Rate My Doctor";
+    ViewData["ActiveTab"] = "rating";
+}
+
+<div class="dashboard-layout">
+    <main class="dashboard-main rmd-page">
+
+        @* {{-- ── Hero Header ── --}} *@
+        <div class="rmd-hero mb-5">
+            <div class="rmd-hero-inner">
+                <div class="rmd-hero-icon">
+                    <i class="fas fa-star-half-alt"></i>
+                </div>
+                <div>
+                    <h1 class="rmd-hero-title">Rate Your Doctor</h1>
+                    <p class="rmd-hero-sub">
+                        Your feedback helps patients find the right care and helps doctors improve.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        @* {{-- ── Alerts ── --}} *@
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert rmd-alert-success alert-dismissible fade show mb-4" role="alert">
+                <i class="fas fa-check-circle me-2"></i> @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert rmd-alert-danger alert-dismissible fade show mb-4" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i> @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @* {{-- ── Empty state ── --}} *@
+        @if (!Model.Any())
+        {
+            <div class="rmd-empty">
+                <div class="rmd-empty-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <h4 class="rmd-empty-title">No doctors to rate yet</h4>
+                <p class="rmd-empty-sub">
+                    A doctor will appear here once your appointment is marked as
+                    <span class="rmd-badge-done">Done</span>
+                </p>
+                <a asp-controller="PatientDashboard" asp-action="Appointments"
+                   class="rmd-btn-primary">
+                    <i class="fas fa-calendar-alt me-2"></i> View My Appointments
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var item in Model)
+                {
+                    <div class="col-12 col-md-6 col-xl-4">
+                        <div class="rmd-card" id="card-@item.AppointmentId">
+
+                            @* {{-- ── Doctor info section ── --}} *@
+                            <div class="rmd-card-header">
+                                <div class="rmd-avatar">
+                                    <i class="fas fa-user-md"></i>
+                                </div>
+                                <div class="rmd-doctor-info">
+                                    <h5 class="rmd-doctor-name">Dr. @item.DoctorName</h5>
+                                    <span class="rmd-spec-badge">@item.Specialization</span>
+                                </div>
+                            </div>
+
+                            <div class="rmd-card-meta">
+                                <div class="rmd-meta-item">
+                                    <i class="fas fa-calendar-check"></i>
+                                    <span>Completed @item.AppointmentDate.ToString("MMM dd, yyyy")</span>
+                                </div>
+                                <span class="rmd-done-badge">
+                                    <i class="fas fa-circle-check me-1"></i> Appointment Done
+                                </span>
+                            </div>
+
+                            @* {{-- ── Rate Now button (collapsed state) ── --}} *@
+                            <div class="rmd-trigger" id="trigger-@item.AppointmentId">
+                                <div class="rmd-preview-stars">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <i class="fas fa-star"></i>
+                                    }
+                                </div>
+                                <button class="rmd-btn-rate toggle-btn"
+                                        type="button"
+                                        data-target="form-@item.AppointmentId"
+                                        data-trigger="trigger-@item.AppointmentId">
+                                    <i class="fas fa-star me-2"></i>Rate This Doctor
+                                </button>
+                            </div>
+
+                            @* {{-- ── Inline rating form (expanded state) ── --}} *@
+                            <div class="rmd-form-panel" id="form-@item.AppointmentId" style="display:none;">
+                                <form asp-controller="Rating" asp-action="Create" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="AppointmentId" value="@item.AppointmentId" />
+                                    <input type="hidden" name="DoctorName" value="@item.DoctorName" />
+                                    <input type="hidden" name="Specialization" value="@item.Specialization" />
+                                    <input type="hidden" name="AppointmentDate"
+                                           value="@item.AppointmentDate.ToString("o")" />
+
+                                    @* {{-- Stars --}} *@
+                                    <div class="rmd-stars-section">
+                                        <p class="rmd-section-label">
+                                            <i class="fas fa-star-half-alt me-1"></i>Your Rating
+                                        </p>
+                                        <div class="rmd-stars" data-input="rate-@item.AppointmentId">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                <button type="button"
+                                                        class="rmd-star @(i == 5 ? "selected" : "")"
+                                                        data-value="@i"
+                                                        aria-label="@i star">
+                                                    <i class="fas fa-star"></i>
+                                                </button>
+                                            }
+                                        </div>
+                                        <div class="rmd-rating-label" id="label-@item.AppointmentId">
+                                            Excellent
+                                        </div>
+                                        <input type="hidden"
+                                               name="Rate"
+                                               id="rate-@item.AppointmentId"
+                                               value="5" />
+                                    </div>
+
+                                    @* {{-- Comment --}} *@
+                                    <div class="rmd-comment-section">
+                                        <label class="rmd-section-label">
+                                            <i class="fas fa-comment-dots me-1"></i>Your Comment
+                                            <span class="rmd-optional">(optional)</span>
+                                        </label>
+                                        <div class="rmd-textarea-wrap">
+                                            <textarea name="Comment"
+                                              class="rmd-textarea"
+                                              rows="3"
+                                              maxlength="1000"
+                                              placeholder="Share your experience — what made this visit great or what could be improved?"
+                                              data-counter="counter-@item.AppointmentId"></textarea>
+                                            <div class="rmd-char-counter">
+                                                <span id="counter-@item.AppointmentId">0</span>/1000
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    @* {{-- Actions --}} *@
+                                    <div class="rmd-form-footer">
+                                        <button type="submit" class="rmd-btn-submit">
+                                            <i class="fas fa-paper-plane me-2"></i>Submit Feedback
+                                        </button>
+                                        <button type="button"
+                                                class="rmd-btn-cancel cancel-btn"
+                                                data-target="form-@item.AppointmentId"
+                                                data-trigger="trigger-@item.AppointmentId">
+                                            Cancel
+                                        </button>
+                                    </div>
+
+                                </form>
+                            </div>
+                            @* {{-- end panel --}} *@
+
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+    </main>
+</div>
+
+@section Scripts {
+    <script>
+        const LABELS = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+
+        /* ── Toggle open/close ── */
+        document.querySelectorAll('.toggle-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const form    = document.getElementById(btn.dataset.target);
+                const trigger = document.getElementById(btn.dataset.trigger);
+                trigger.style.display = 'none';
+                form.style.display    = 'block';
+                form.classList.add('rmd-slide-in');
+            });
+        });
+
+        document.querySelectorAll('.cancel-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const form    = document.getElementById(btn.dataset.target);
+                const trigger = document.getElementById(btn.dataset.trigger);
+                form.style.display    = 'none';
+                trigger.style.display = 'block';
+                form.classList.remove('rmd-slide-in');
+            });
+        });
+
+        /* ── Interactive stars ── */
+        document.querySelectorAll('.rmd-stars').forEach(picker => {
+            const inputId  = picker.dataset.input;
+            const input    = document.getElementById(inputId);
+            const labelEl  = document.getElementById('label-' + inputId.replace('rate-', ''));
+            const stars    = picker.querySelectorAll('.rmd-star');
+
+            function paint(val, hover) {
+                stars.forEach(s => {
+                    const v = parseInt(s.dataset.value);
+                    s.classList.toggle('selected', v <= val && !hover);
+                    s.classList.toggle('hovered',  v <= val &&  hover);
+                });
+                if (labelEl) labelEl.textContent = LABELS[val] || '';
+            }
+
+            stars.forEach(star => {
+                const val = parseInt(star.dataset.value);
+                star.addEventListener('click', () => {
+                    input.value = val;
+                    paint(val, false);
+                });
+                star.addEventListener('mouseenter', () => paint(val, true));
+                star.addEventListener('mouseleave', () => paint(parseInt(input.value), false));
+            });
+        });
+
+        /* ── Character counter ── */
+        document.querySelectorAll('.rmd-textarea').forEach(ta => {
+            const counterId = ta.dataset.counter;
+            const counter   = document.getElementById(counterId);
+            if (!counter) return;
+            ta.addEventListener('input', () => {
+                counter.textContent = ta.value.length;
+                counter.closest('.rmd-char-counter')
+                       .classList.toggle('rmd-counter-warn', ta.value.length > 900);
+            });
+        });
+    </script>
+}
+
+<style>
+    /* ═══════════════════════════════════════════
+           TOKENS
+        ═══════════════════════════════════════════ */
+    :root {
+        --rmd-primary: #2563EB;
+        --rmd-primary-lt: #EFF6FF;
+        --rmd-secondary: #3B82F6;
+        --rmd-success: #10B981;
+        --rmd-success-lt: #ECFDF5;
+        --rmd-bg: #F8FAFC;
+        --rmd-surface: #FFFFFF;
+        --rmd-text: #1E293B;
+        --rmd-muted: #64748B;
+        --rmd-border: #E2E8F0;
+        --rmd-star-on: #F59E0B;
+        --rmd-star-off: #CBD5E1;
+        --rmd-radius: 16px;
+        --rmd-shadow: 0 2px 12px rgba(37,99,235,.08), 0 1px 3px rgba(0,0,0,.06);
+        --rmd-shadow-lg: 0 8px 32px rgba(37,99,235,.13), 0 2px 8px rgba(0,0,0,.07);
+    }
+
+    /* ═══════════════════════════════════════════
+           PAGE
+        ═══════════════════════════════════════════ */
+    .rmd-page {
+        background: var(--rmd-bg);
+        min-height: 100vh;
+    }
+
+    /* ═══════════════════════════════════════════
+           HERO
+        ═══════════════════════════════════════════ */
+    .rmd-hero {
+        background: linear-gradient(135deg, #1D4ED8 0%, #2563EB 50%, #3B82F6 100%);
+        border-radius: var(--rmd-radius);
+        padding: 36px 40px;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .rmd-hero::before {
+            content: '';
+            position: absolute;
+            top: -40px;
+            right: -40px;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.07);
+        }
+
+        .rmd-hero::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            right: 80px;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.05);
+        }
+
+    .rmd-hero-inner {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .rmd-hero-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        background: rgba(255,255,255,.18);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #FDE68A;
+        font-size: 24px;
+        flex-shrink: 0;
+    }
+
+    .rmd-hero-title {
+        font-size: 1.65rem;
+        font-weight: 700;
+        color: #fff;
+        margin: 0 0 4px;
+        letter-spacing: -.3px;
+    }
+
+    .rmd-hero-sub {
+        color: rgba(255,255,255,.80);
+        font-size: .9rem;
+        margin: 0;
+    }
+
+    /* ═══════════════════════════════════════════
+           ALERTS
+        ═══════════════════════════════════════════ */
+    .rmd-alert-success {
+        background: var(--rmd-success-lt);
+        border: 1px solid #A7F3D0;
+        color: #065F46;
+        border-radius: 12px;
+    }
+
+    .rmd-alert-danger {
+        background: #FEF2F2;
+        border: 1px solid #FECACA;
+        color: #991B1B;
+        border-radius: 12px;
+    }
+
+    /* ═══════════════════════════════════════════
+           EMPTY STATE
+        ═══════════════════════════════════════════ */
+    .rmd-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 80px 24px;
+        text-align: center;
+    }
+
+    .rmd-empty-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: #FEF3C7;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        color: var(--rmd-star-on);
+        margin-bottom: 20px;
+    }
+
+    .rmd-empty-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--rmd-text);
+        margin-bottom: 8px;
+    }
+
+    .rmd-empty-sub {
+        color: var(--rmd-muted);
+        font-size: .9rem;
+        margin-bottom: 24px;
+    }
+
+    .rmd-badge-done {
+        display: inline-block;
+        background: var(--rmd-success-lt);
+        color: var(--rmd-success);
+        border: 1px solid #A7F3D0;
+        border-radius: 99px;
+        padding: 2px 10px;
+        font-size: .78rem;
+        font-weight: 600;
+    }
+
+    /* ═══════════════════════════════════════════
+           CARD
+        ═══════════════════════════════════════════ */
+    .rmd-card {
+        background: var(--rmd-surface);
+        border-radius: var(--rmd-radius);
+        box-shadow: var(--rmd-shadow);
+        overflow: hidden;
+        transition: box-shadow .25s, transform .25s;
+        height: 100%;
+    }
+
+        .rmd-card:hover {
+            box-shadow: var(--rmd-shadow-lg);
+            transform: translateY(-3px);
+        }
+
+    /* Card header */
+    .rmd-card-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 24px 24px 0;
+    }
+
+    .rmd-avatar {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #1D4ED8, #60A5FA);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 22px;
+        flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(37,99,235,.30);
+    }
+
+    .rmd-doctor-name {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--rmd-text);
+        margin: 0 0 6px;
+    }
+
+    .rmd-spec-badge {
+        background: var(--rmd-primary-lt);
+        color: var(--rmd-primary);
+        border-radius: 99px;
+        padding: 3px 12px;
+        font-size: .75rem;
+        font-weight: 600;
+    }
+
+    /* Meta row */
+    .rmd-card-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 14px 24px 16px;
+        border-bottom: 1px solid var(--rmd-border);
+    }
+
+    .rmd-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        color: var(--rmd-muted);
+        font-size: .82rem;
+    }
+
+        .rmd-meta-item i {
+            color: var(--rmd-success);
+        }
+
+    .rmd-done-badge {
+        background: var(--rmd-success-lt);
+        color: var(--rmd-success);
+        border-radius: 99px;
+        padding: 3px 10px;
+        font-size: .72rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    /* ── Trigger (collapsed) ── */
+    .rmd-trigger {
+        padding: 20px 24px 24px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .rmd-preview-stars i {
+        color: var(--rmd-star-off);
+        font-size: 18px;
+        margin: 0 2px;
+    }
+
+    /* ── Rate button ── */
+    .rmd-btn-rate {
+        width: 100%;
+        padding: 13px;
+        background: linear-gradient(135deg, #F59E0B, #FBBF24);
+        color: #fff;
+        font-weight: 700;
+        font-size: .9rem;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: filter .2s, transform .15s, box-shadow .2s;
+        box-shadow: 0 4px 12px rgba(245,158,11,.30);
+    }
+
+        .rmd-btn-rate:hover {
+            filter: brightness(1.06);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(245,158,11,.40);
+        }
+
+    /* ── Form panel (expanded) ── */
+    .rmd-form-panel {
+        padding: 0 24px 24px;
+    }
+
+    .rmd-slide-in {
+        animation: rmdSlide .22s ease;
+    }
+
+    @@keyframes rmdSlide {
+        from {
+            opacity: 0;
+            transform: translateY(-8px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Stars section */
+    .rmd-stars-section {
+        background: #FAFBFF;
+        border: 1px solid var(--rmd-border);
+        border-radius: 12px;
+        padding: 18px;
+        text-align: center;
+        margin-bottom: 16px;
+    }
+
+    .rmd-section-label {
+        font-size: .78rem;
+        font-weight: 700;
+        color: var(--rmd-muted);
+        text-transform: uppercase;
+        letter-spacing: .6px;
+        margin-bottom: 14px;
+    }
+
+    .rmd-stars {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+
+    .rmd-star {
+        background: none;
+        border: none;
+        padding: 4px;
+        cursor: pointer;
+        font-size: 30px;
+        color: var(--rmd-star-off);
+        transition: color .15s, transform .12s;
+        line-height: 1;
+    }
+
+        .rmd-star.selected {
+            color: var(--rmd-star-on);
+        }
+
+        .rmd-star.hovered {
+            color: #FBBF24;
+        }
+
+        .rmd-star:hover {
+            transform: scale(1.22);
+        }
+
+    .rmd-rating-label {
+        font-size: .88rem;
+        font-weight: 600;
+        color: var(--rmd-star-on);
+        min-height: 20px;
+        letter-spacing: .2px;
+    }
+
+    /* Comment section */
+    .rmd-comment-section {
+        margin-bottom: 16px;
+    }
+
+    .rmd-optional {
+        font-weight: 400;
+        color: var(--rmd-muted);
+        font-size: .78rem;
+        margin-left: 4px;
+        text-transform: none;
+        letter-spacing: 0;
+    }
+
+    .rmd-textarea-wrap {
+        position: relative;
+    }
+
+    .rmd-textarea {
+        width: 100%;
+        border: 1.5px solid var(--rmd-border);
+        border-radius: 10px;
+        padding: 12px 14px 32px;
+        font-size: .88rem;
+        color: var(--rmd-text);
+        resize: none;
+        transition: border-color .2s, box-shadow .2s;
+        background: var(--rmd-surface);
+        outline: none;
+        font-family: inherit;
+    }
+
+        .rmd-textarea:focus {
+            border-color: var(--rmd-primary);
+            box-shadow: 0 0 0 3px rgba(37,99,235,.10);
+        }
+
+    .rmd-char-counter {
+        position: absolute;
+        bottom: 10px;
+        right: 12px;
+        font-size: .72rem;
+        color: var(--rmd-muted);
+        pointer-events: none;
+    }
+
+    .rmd-counter-warn {
+        color: #DC2626;
+    }
+
+    /* Form footer */
+    .rmd-form-footer {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .rmd-btn-submit {
+        flex: 1;
+        padding: 12px;
+        background: linear-gradient(135deg, #059669, #10B981);
+        color: #fff;
+        font-weight: 700;
+        font-size: .88rem;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: filter .2s, box-shadow .2s;
+        box-shadow: 0 4px 12px rgba(16,185,129,.25);
+    }
+
+        .rmd-btn-submit:hover {
+            filter: brightness(1.07);
+            box-shadow: 0 6px 16px rgba(16,185,129,.35);
+        }
+
+    .rmd-btn-cancel {
+        padding: 12px 18px;
+        background: transparent;
+        color: var(--rmd-muted);
+        font-size: .88rem;
+        font-weight: 600;
+        border: 1.5px solid var(--rmd-border);
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background .2s, color .2s;
+        white-space: nowrap;
+    }
+
+        .rmd-btn-cancel:hover {
+            background: var(--rmd-bg);
+            color: var(--rmd-text);
+        }
+
+    .rmd-btn-primary {
+        display: inline-flex;
+        align-items: center;
+        padding: 12px 28px;
+        background: var(--rmd-primary);
+        color: #fff;
+        font-weight: 700;
+        border-radius: 12px;
+        text-decoration: none;
+        font-size: .9rem;
+        transition: filter .2s, box-shadow .2s;
+        box-shadow: 0 4px 12px rgba(37,99,235,.25);
+    }
+
+        .rmd-btn-primary:hover {
+            filter: brightness(1.08);
+            color: #fff;
+            box-shadow: 0 6px 18px rgba(37,99,235,.35);
+        }
+
+    /* ═══════════════════════════════════════════
+           RESPONSIVE
+        ═══════════════════════════════════════════ */
+    @@media (max-width: 640px) {
+        .rmd-hero {
+            padding: 24px 20px;
+        }
+
+        .rmd-hero-title {
+            font-size: 1.3rem;
+        }
+
+        .rmd-card-meta {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .rmd-star {
+            font-size: 26px;
+        }
+    }
+</style>

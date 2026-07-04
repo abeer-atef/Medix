@@ -1,0 +1,666 @@
+@model Midix.ViewModel.StructuredPrescriptionAnalysis
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Prescription Analysis Result";
+    ViewData["ActiveTab"] = "ai";
+}
+
+@section Styles {
+    <style>
+        body {
+            background: var(--gray-50);
+        }
+
+        /* ── Sidebar logout button ───────────────────────────────────────── */
+        .sidebar-link.logout-btn {
+            width: 100%;
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--gray-600);
+            transition: var(--transition);
+        }
+
+            .sidebar-link.logout-btn:hover {
+                background: #fff0f0;
+                color: #e53e3e;
+            }
+
+        /* ── Result page layout ──────────────────────────────────────────── */
+        .dashboard-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* ── Generic result card ─────────────────────────────────────────── */
+        .result-card {
+            background: #fff;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+
+        .result-card-header {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding: 1.1rem 1.5rem;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+            .result-card-header .card-icon {
+                width: 40px;
+                height: 40px;
+                border-radius: var(--radius-sm);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1rem;
+                flex-shrink: 0;
+            }
+
+            .result-card-header h2 {
+                font-family: var(--font-heading);
+                font-size: 1rem;
+                font-weight: 700;
+                color: var(--gray-900);
+                margin: 0;
+            }
+
+        .result-card-body {
+            padding: 1.5rem;
+        }
+
+        /* ── Colour themes for card icons ───────────────────────────────── */
+        .icon-blue {
+            background: var(--blue-light);
+            color: var(--blue);
+        }
+
+        .icon-green {
+            background: var(--green-light);
+            color: var(--green);
+        }
+
+        .icon-orange {
+            background: var(--orange-light);
+            color: var(--orange);
+        }
+
+        .icon-purple {
+            background: var(--purple-light);
+            color: var(--purple);
+        }
+
+        .icon-teal {
+            background: var(--teal-light);
+            color: var(--teal);
+        }
+
+        /* ── Summary grid ────────────────────────────────────────────────── */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .summary-item {
+            display: flex;
+            flex-direction: column;
+            gap: .3rem;
+        }
+
+        .summary-label {
+            font-size: .72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            color: var(--gray-500);
+        }
+
+        .summary-value {
+            font-size: .95rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+        }
+
+            .summary-value i {
+                font-size: .85rem;
+            }
+
+        .badge-specialty {
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            padding: .3rem .8rem;
+            border-radius: var(--radius-full);
+            font-size: .8rem;
+            font-weight: 600;
+            background: var(--blue-light);
+            color: var(--blue);
+        }
+
+        .badge-diagnosis {
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            padding: .3rem .8rem;
+            border-radius: var(--radius-full);
+            font-size: .8rem;
+            font-weight: 600;
+            background: var(--orange-light);
+            color: var(--orange);
+        }
+
+        /* ── Medications table ───────────────────────────────────────────── */
+        .med-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .875rem;
+        }
+
+            .med-table thead tr {
+                background: var(--gray-50);
+                border-bottom: 2px solid var(--gray-100);
+            }
+
+            .med-table thead th {
+                padding: .75rem 1rem;
+                text-align: left;
+                font-size: .72rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: .07em;
+                color: var(--gray-500);
+                white-space: nowrap;
+            }
+
+            .med-table tbody tr {
+                border-bottom: 1px solid var(--gray-100);
+                transition: background .15s;
+            }
+
+                .med-table tbody tr:last-child {
+                    border-bottom: none;
+                }
+
+                .med-table tbody tr:hover {
+                    background: var(--gray-50);
+                }
+
+            .med-table td {
+                padding: 1rem;
+                vertical-align: top;
+                color: var(--gray-700);
+            }
+
+        /* Medication name cell */
+        .med-name-cell {
+            display: flex;
+            align-items: flex-start;
+            gap: .6rem;
+        }
+
+        .med-num {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--blue-light);
+            color: var(--blue);
+            font-size: .72rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: .1rem;
+        }
+
+        .med-name {
+            font-weight: 700;
+            color: var(--gray-900);
+            display: block;
+        }
+
+        .med-form {
+            font-size: .78rem;
+            color: var(--gray-500);
+        }
+
+        /* Dosage/frequency pills */
+        .info-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: .3rem;
+            padding: .25rem .65rem;
+            border-radius: var(--radius-full);
+            font-size: .78rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .pill-green {
+            background: var(--green-light);
+            color: var(--green);
+        }
+
+        .pill-purple {
+            background: var(--purple-light);
+            color: var(--purple);
+        }
+
+        .pill-teal {
+            background: var(--teal-light);
+            color: var(--teal);
+        }
+
+        /* Arabic instructions cell */
+        .ar-instructions {
+            font-size: .82rem;
+            color: var(--gray-700);
+            direction: rtl;
+            text-align: right;
+            line-height: 1.7;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--gray-50);
+            border-radius: var(--radius-sm);
+            padding: .5rem .75rem;
+            border-right: 3px solid var(--teal);
+        }
+
+        /* ── Empty state ─────────────────────────────────────────────────── */
+        .empty-state {
+            text-align: center;
+            padding: 2.5rem 1rem;
+            color: var(--gray-400);
+        }
+
+            .empty-state i {
+                font-size: 2rem;
+                margin-bottom: .5rem;
+                display: block;
+            }
+
+        /* ── Prose text sections ─────────────────────────────────────────── */
+        .prose-text {
+            font-size: .9rem;
+            color: var(--gray-700);
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+
+        .precaution-block {
+            background: var(--orange-light);
+            border-left: 4px solid var(--orange);
+            border-radius: var(--radius-sm);
+            padding: 1rem 1.25rem;
+            font-size: .875rem;
+            color: var(--gray-800);
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+
+        /* ── Action bar ──────────────────────────────────────────────────── */
+        .action-bar {
+            display: flex;
+            gap: .75rem;
+            flex-wrap: wrap;
+            padding-top: .5rem;
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            padding: .65rem 1.4rem;
+            border-radius: var(--radius-sm);
+            font-size: .875rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            border: none;
+            transition: var(--transition);
+        }
+
+            .action-btn.primary {
+                background: var(--blue);
+                color: #fff;
+            }
+
+                .action-btn.primary:hover {
+                    background: var(--blue-dark);
+                    transform: translateY(-1px);
+                    box-shadow: 0 6px 18px rgba(26,115,232,.3);
+                }
+
+            .action-btn.secondary {
+                background: #fff;
+                color: var(--gray-700);
+                border: 1.5px solid var(--gray-200);
+            }
+
+                .action-btn.secondary:hover {
+                    background: var(--gray-50);
+                    border-color: var(--gray-300);
+                    transform: translateY(-1px);
+                }
+
+            .action-btn.print-btn {
+                background: var(--green-light);
+                color: var(--green);
+            }
+
+                .action-btn.print-btn:hover {
+                    background: #bbf7d0;
+                }
+
+        @@media print {
+            .sidebar, .action-bar, nav.navbar {
+                display: none !important;
+            }
+
+            .dashboard-main {
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+        }
+
+        @@media (max-width: 640px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .med-table thead {
+                display: none;
+            }
+
+            .med-table td {
+                display: block;
+                padding: .5rem 1rem;
+            }
+
+                .med-table td::before {
+                    content: attr(data-label);
+                    font-size: .7rem;
+                    font-weight: 700;
+                    color: var(--gray-500);
+                    text-transform: uppercase;
+                    display: block;
+                    margin-bottom: .2rem;
+                }
+        }
+    </style>
+}
+
+<div class="dashboard-layout">
+
+
+    @await Html.PartialAsync("~/Views/PatientDashboard/_PatientSidebar.cshtml", (Midix.ViewModel.PatientHeaderInfo)ViewData["PatientHeader"])
+
+    <main class="dashboard-main">
+
+        @* ── Page header ─────────────────────────────────────────────── *@
+        <div class="dashboard-header blue-header">
+            <div>
+                <h1><i class="fas fa-microscope" style="margin-right:.5rem;"></i>Analysis Complete</h1>
+                <p>Here is what our AI found in your prescription image.</p>
+            </div>
+            <div class="action-bar">
+                <a asp-controller="AiPrescription" asp-action="Index" class="action-btn secondary">
+                    <i class="fas fa-upload"></i> Upload Another
+                </a>
+                <a asp-controller="PatientDashboard" asp-action="Index" class="action-btn primary">
+                    <i class="fas fa-chart-pie"></i> Back to Dashboard
+                </a>
+                <button onclick="window.print()" class="action-btn print-btn">
+                    <i class="fas fa-print"></i> Print
+                </button>
+            </div>
+        </div>
+
+        <div class="dashboard-content">
+
+            @* ═══════════════════════════════════════════════════════════ *@
+            @* 1. SUMMARY CARD                                            *@
+            @* ═══════════════════════════════════════════════════════════ *@
+            <div class="result-card">
+                <div class="result-card-header">
+                    <div class="card-icon icon-blue"><i class="fas fa-stethoscope"></i></div>
+                    <h2>Prescription Summary</h2>
+                </div>
+                <div class="result-card-body">
+                    <div class="summary-grid">
+
+                        <div class="summary-item">
+                            <span class="summary-label"><i class="fas fa-user-md"></i> Doctor Specialty</span>
+                            @if (!string.IsNullOrWhiteSpace(Model.DoctorSpecialty))
+                            {
+                                <span class="summary-value">
+                                    <span class="badge-specialty">
+                                        <i class="fas fa-briefcase-medical"></i>
+                                        @Model.DoctorSpecialty
+                                    </span>
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="summary-value" style="color:var(--gray-400);">Not detected</span>
+                            }
+                        </div>
+
+                        <div class="summary-item">
+                            <span class="summary-label"><i class="fas fa-diagnoses"></i> Suspected Diagnosis</span>
+                            @if (!string.IsNullOrWhiteSpace(Model.SuspectedDiagnosis))
+                            {
+                                <span class="summary-value">
+                                    <span class="badge-diagnosis">
+                                        <i class="fas fa-search"></i>
+                                        @Model.SuspectedDiagnosis
+                                    </span>
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="summary-value" style="color:var(--gray-400);">Not detected</span>
+                            }
+                        </div>
+
+                        <div class="summary-item" style="grid-column: 1 / -1;">
+                            <span class="summary-label"><i class="fas fa-pills"></i> Total Medications Found</span>
+                            <span class="summary-value">
+                                <i class="fas fa-capsules" style="color:var(--purple);"></i>
+                                @Model.Medications.Count medication@(Model.Medications.Count == 1 ? "" : "s") identified
+                            </span>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            @* ═══════════════════════════════════════════════════════════ *@
+            @* 2. MEDICATIONS TABLE                                        *@
+            @* ═══════════════════════════════════════════════════════════ *@
+            <div class="result-card">
+                <div class="result-card-header">
+                    <div class="card-icon icon-purple"><i class="fas fa-pills"></i></div>
+                    <h2>Medications</h2>
+                </div>
+
+                @if (Model.Medications.Any())
+                {
+                    <div style="overflow-x:auto;">
+                        <table class="med-table">
+                            <thead>
+                                <tr>
+                                    <th>#&nbsp;&nbsp;Name &amp; Form</th>
+                                    <th>Dosage</th>
+                                    <th>Frequency</th>
+                                    <th>Duration</th>
+                                    <th>Instructions (AR)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int i = 0; i < Model.Medications.Count; i++)
+                                {
+                                    var med = Model.Medications[i];
+                                    <tr>
+                                        @* Name & Form *@
+                                        <td data-label="Name">
+                                            <div class="med-name-cell">
+                                                <div class="med-num">@(i + 1)</div>
+                                                <div>
+                                                    <span class="med-name">@(string.IsNullOrWhiteSpace(med.Name) ? "—" : med.Name)</span>
+                                                    @if (!string.IsNullOrWhiteSpace(med.DosageForm))
+                                                    {
+                                                        <span class="med-form"><i class="fas fa-capsules"></i> @med.DosageForm</span>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        @* Dosage *@
+                                        <td data-label="Dosage">
+                                            @if (!string.IsNullOrWhiteSpace(med.Dosage))
+                                            {
+                                                <span class="info-pill pill-green">
+                                                    <i class="fas fa-weight-hanging"></i> @med.Dosage
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span style="color:var(--gray-400);">—</span>
+                                            }
+                                        </td>
+
+                                        @* Frequency *@
+                                        <td data-label="Frequency">
+                                            @if (!string.IsNullOrWhiteSpace(med.Frequency))
+                                            {
+                                                <span class="info-pill pill-purple">
+                                                    <i class="fas fa-clock"></i> @med.Frequency
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span style="color:var(--gray-400);">—</span>
+                                            }
+                                        </td>
+
+                                        @* Duration *@
+                                        <td data-label="Duration">
+                                            @if (!string.IsNullOrWhiteSpace(med.Duration))
+                                            {
+                                                <span class="info-pill pill-teal">
+                                                    <i class="fas fa-calendar-day"></i> @med.Duration
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span style="color:var(--gray-400);">—</span>
+                                            }
+                                        </td>
+
+                                        @* Arabic instructions *@
+                                        <td data-label="Instructions (AR)">
+                                            @if (!string.IsNullOrWhiteSpace(med.InstructionsAr))
+                                            {
+                                                <div class="ar-instructions">@med.InstructionsAr</div>
+                                            }
+                                            else
+                                            {
+                                                <span style="color:var(--gray-400);">—</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <i class="fas fa-pills"></i>
+                        No medications could be extracted from this prescription.
+                    </div>
+                }
+            </div>
+
+            @* ═══════════════════════════════════════════════════════════ *@
+            @* 3. GENERAL PRECAUTIONS                                      *@
+            @* ═══════════════════════════════════════════════════════════ *@
+            @if (!string.IsNullOrWhiteSpace(Model.GeneralPrecautions))
+            {
+                <div class="result-card">
+                    <div class="result-card-header">
+                        <div class="card-icon icon-orange"><i class="fas fa-exclamation-triangle"></i></div>
+                        <h2>General Precautions</h2>
+                    </div>
+                    <div class="result-card-body">
+                        <div class="precaution-block">@Model.GeneralPrecautions</div>
+                    </div>
+                </div>
+            }
+
+            @* ═══════════════════════════════════════════════════════════ *@
+            @* 4. RAW MEDICAL SUMMARY (English)                            *@
+            @* ═══════════════════════════════════════════════════════════ *@
+            @if (!string.IsNullOrWhiteSpace(Model.RawMedicalSummaryEn))
+            {
+                <div class="result-card">
+                    <div class="result-card-header">
+                        <div class="card-icon icon-teal"><i class="fas fa-file-medical-alt"></i></div>
+                        <h2>Medical Summary</h2>
+                    </div>
+                    <div class="result-card-body">
+                        <p class="prose-text">@Model.RawMedicalSummaryEn</p>
+                    </div>
+                </div>
+            }
+
+            @* ═══════════════════════════════════════════════════════════ *@
+            @* 5. DISCLAIMER                                               *@
+            @* ═══════════════════════════════════════════════════════════ *@
+            <div class="result-card" style="border-left: 4px solid var(--gray-300);">
+                <div class="result-card-body" style="display:flex;gap:.75rem;align-items:flex-start;">
+                    <i class="fas fa-shield-alt" style="color:var(--gray-400);margin-top:.15rem;flex-shrink:0;"></i>
+                    <p style="font-size:.8rem;color:var(--gray-500);line-height:1.7;margin:0;">
+                        <strong style="color:var(--gray-700);">Medical Disclaimer:</strong>
+                        This analysis was generated by an AI system and is provided for informational purposes only.
+                        It does not constitute medical advice. Always follow your doctor's instructions and
+                        consult a licensed healthcare professional before making any treatment decisions.
+                    </p>
+                </div>
+            </div>
+
+            @* ═══════════════════════════════════════════════════════════ *@
+            @* 6. BOTTOM ACTION BAR                                        *@
+            @* ═══════════════════════════════════════════════════════════ *@
+            <div class="action-bar" style="padding-bottom: 1rem;">
+                <a asp-controller="Prescriptions" asp-action="Index" class="action-btn secondary">
+                    <i class="fas fa-upload"></i> Upload Another Prescription
+                </a>
+                <a asp-controller="PatientDashboard" asp-action="Prescriptions" class="action-btn secondary">
+                    <i class="fas fa-file-prescription"></i> My Prescriptions
+                </a>
+                <a asp-controller="PatientDashboard" asp-action="Index" class="action-btn primary">
+                    <i class="fas fa-chart-pie"></i> Back to Dashboard
+                </a>
+            </div>
+
+        </div>@* /.dashboard-content *@
+    </main>
+</div>

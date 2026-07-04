@@ -1,0 +1,267 @@
+@model Midix.ViewModel.BookAppointmentViewModel
+
+@{
+    ViewData["Title"] = "Book Appointment";
+    ViewData["ActiveTab"] = "book";
+}
+
+@section Styles {
+    <style>
+        body {
+            background: var(--gray-50);
+        }
+
+        #navbar {
+            display: none;
+        }
+
+        .sidebar-link.logout-btn {
+            width: 100%;
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--gray-600);
+            transition: var(--transition);
+        }
+
+            .sidebar-link.logout-btn:hover {
+                background: #fff0f0;
+                color: #e53e3e;
+            }
+
+        .doctor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            padding: 0.5rem 0;
+        }
+
+        .doctor-card {
+            background: #fff;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            padding: 1.75rem 1.5rem;
+            text-align: center;
+            transition: transform .2s ease, box-shadow .2s ease;
+            border: 1px solid var(--gray-100);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between min-height: 320px;
+        }
+
+            .doctor-card:hover {
+                transform: translateY(-4px);
+                box-shadow: var(--shadow-md);
+                border-color: var(--blue-light);
+            }
+
+            .doctor-card .doc-avatar {
+                width: 64px !important;
+                height: 64px !important;
+                min-width: 64px !important;
+                min-height: 64px !important;
+                border-radius: 50% !important;
+                background: var(--blue-light) !important;
+                color: var(--blue) !important;
+                font-size: 1.3rem;
+                font-weight: 700;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 1rem !important;
+                box-shadow: none !important;
+            }
+
+        .doc-name {
+            font-family: var(--font-heading);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: .25rem;
+        }
+
+        .doc-spec {
+            font-size: .85rem;
+            color: var(--gray-500);
+            margin-bottom: .5rem;
+        }
+
+        .doc-rating {
+            font-size: .85rem;
+            color: #f6ad55;
+            margin-bottom: .75rem;
+        }
+
+        .doc-fee {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--blue);
+            margin-bottom: 1.25rem;
+        }
+
+        .doctor-card .btn-blue {
+            margin-top: auto;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .search-bar-card {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+            .search-bar-card input[type="text"] {
+                flex: 1;
+                min-width: 220px;
+                padding: .65rem 1rem;
+                border: 1px solid var(--gray-200);
+                border-radius: var(--radius-sm);
+                font-size: .9rem;
+            }
+
+            .search-bar-card select {
+                padding: .65rem 1rem;
+                border: 1px solid var(--gray-200);
+                border-radius: var(--radius-sm);
+                font-size: .9rem;
+                min-width: 200px;
+            }
+
+            .search-bar-card button {
+                padding: .65rem 1.5rem;
+            }
+    </style>
+}
+
+
+<div class="dashboard-layout">
+
+    @await Html.PartialAsync("_PatientSidebar", (Midix.ViewModel.PatientHeaderInfo)Model)
+
+    <main class="dashboard-main">
+
+        <div class="dashboard-header blue-header">
+            <div>
+                <h1>Book an Appointment</h1>
+                <p>Step 1 of 3 — Choose a doctor</p>
+            </div>
+        </div>
+
+        <div class="dash-card search-bar-card">
+            <input type="text"
+                   id="doctorSearchInput"
+                   placeholder="Search by doctor name or specialty..." />
+
+            <select id="specializationFilter">
+                <option value="">All Specializations</option>
+                @foreach (var spec in Model.AvailableDoctors.Select(d => d.Specialization).Distinct().OrderBy(s => s))
+                {
+                    <option value="@spec">@spec</option>
+                }
+            </select>
+
+            <button type="button" id="doctorSearchBtn" class="btn btn-primary">
+                <i class="fas fa-search"></i> Search
+            </button>
+        </div>
+
+        @if (!Model.AvailableDoctors.Any())
+        {
+            <div class="dash-card" style="padding:2rem;text-align:center;color:var(--gray-400);">
+                No doctors are currently available.
+            </div>
+        }
+        else
+        {
+            <div class="doctor-grid" id="doctorGrid">
+                @foreach (var d in Model.AvailableDoctors)
+                {
+                    <div class="doctor-card"
+                         data-name="@d.FullName.ToLower()"
+                         data-spec="@d.Specialization.ToLower()">
+                        <div class="doc-avatar">@d.Initials</div>
+                        <div class="doc-name">@d.FullName</div>
+                        <div class="doc-spec">@d.Specialization</div>
+                        <div class="doc-rating">
+                            @if (d.RatingCount > 0)
+                            {
+                                <i class="fas fa-star"></i> 
+                                @d.AverageRating @d.RatingCount
+                            }
+                            else
+                            {
+                                <span style="color:var(--gray-400);">No ratings yet</span>
+                            }
+                        </div>
+                        <div class="doc-fee">$@d.ConsultationFee.ToString("0")</div>
+                        <a asp-controller="PatientDashboard"
+                           asp-action="SelectTime"
+                           asp-route-doctorId="@d.UserId"
+                           class="btn btn-primary"
+                           style="width:100%; text-decoration:none;">
+                            <i class="fas fa-calendar-plus"></i> Select Date &amp; Time
+                        </a>
+                    </div>
+                }
+            </div>
+
+            <div id="noResultsMessage" class="dash-card" style="display:none; padding:2rem;text-align:center;color:var(--gray-400);">
+                No doctors match your search.
+            </div>
+        }
+
+    </main>
+</div>
+
+@section Scripts {
+    <script>
+        function filterDoctors() {
+            const query = document.getElementById('doctorSearchInput').value.trim().toLowerCase();
+            const spec = document.getElementById('specializationFilter').value.trim().toLowerCase();
+            const cards = document.querySelectorAll('.doctor-card');
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const name = card.dataset.name || '';
+                const cardSpec = card.dataset.spec || '';
+
+                const matchesQuery = !query || name.includes(query) || cardSpec.includes(query);
+                const matchesSpec = !spec || cardSpec === spec;
+                const isVisible = matchesQuery && matchesSpec;
+
+                card.style.display = isVisible ? '' : 'none';
+                if (isVisible) visibleCount++;
+            });
+
+            const noResultsEl = document.getElementById('noResultsMessage');
+            if (noResultsEl) {
+                noResultsEl.style.display = visibleCount === 0 ? '' : 'none';
+            }
+        }
+
+        const searchBtn = document.getElementById('doctorSearchBtn');
+        const searchInput = document.getElementById('doctorSearchInput');
+        const specSelect = document.getElementById('specializationFilter');
+
+        if (searchBtn) searchBtn.addEventListener('click', filterDoctors);
+        if (specSelect) specSelect.addEventListener('change', filterDoctors);
+        if (searchInput) {
+            searchInput.addEventListener('keyup', function (e) {
+                filterDoctors();
+            });
+        }
+    </script>
+}

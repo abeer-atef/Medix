@@ -1,0 +1,145 @@
+@model Midix.ViewModel.PatientOverviewViewModel
+@using Midix.Models
+
+@{
+    ViewData["Title"]     = "My Dashboard";
+    ViewData["ActiveTab"] = "overview";
+    var hour     = DateTime.Now.Hour;
+    var greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+}
+
+@section Styles {
+<style>
+    body { background: var(--gray-50); }
+
+        #navbar {
+            display: none;
+        }
+    .sidebar-link.logout-btn {
+        width: 100%; background: none; border: none; cursor: pointer; text-align: left;
+        display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+        border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; color: var(--gray-600);
+        transition: var(--transition);
+    }
+    .sidebar-link.logout-btn:hover { background: #fff0f0; color: #e53e3e; }
+</style>
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div style="background:var(--green-light);color:var(--green);padding:12px 20px;border-radius:var(--radius-sm);margin-bottom:16px;">
+        <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div style="background:#fff5f5;color:#e53e3e;padding:12px 20px;border-radius:var(--radius-sm);margin-bottom:16px;">
+        <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+    </div>
+}
+
+<div class="dashboard-layout">
+
+    @await Html.PartialAsync("_PatientSidebar", (Midix.ViewModel.PatientHeaderInfo)Model)
+
+    <main class="dashboard-main">
+
+        <div class="dashboard-header blue-header">
+            <div>
+                <h1>@greeting, @Model.FirstName! 👋</h1>
+                <p>Here's an overview of your health journey.</p>
+            </div>
+            <a asp-controller="PatientDashboard" asp-action="BookAppointment" class="btn btn-blue">
+                <i class="fas fa-calendar-plus"></i> Book Appointment
+            </a>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-card blue">
+                <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
+                <div class="stat-info">
+                    <span class="stat-value">@Model.UpcomingAppointmentsCount</span>
+                    <span class="stat-label">Upcoming Appointments</span>
+                </div>
+            </div>
+            <div class="stat-card teal">
+                <div class="stat-icon"><i class="fas fa-file-prescription"></i></div>
+                <div class="stat-info">
+                    <span class="stat-value">@Model.TotalPrescriptionsCount</span>
+                    <span class="stat-label">Total Prescriptions</span>
+                </div>
+            </div>
+            <div class="stat-card orange">
+                <div class="stat-icon"><i class="fas fa-history"></i></div>
+                <div class="stat-info">
+                    <span class="stat-value">@Model.PastVisitsCount</span>
+                    <span class="stat-label">Past Visits</span>
+                </div>
+            </div>
+            <div class="stat-card purple">
+                <div class="stat-icon"><i class="fas fa-pills"></i></div>
+                <div class="stat-info">
+                    <span class="stat-value">@Model.MedicationsDueCount</span>
+                    <span class="stat-label">Medications</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="dash-grid-2">
+            <div class="dash-card">
+                <div class="card-header">
+                    <h3>Upcoming Appointments</h3>
+                    <a asp-controller="PatientDashboard" asp-action="Appointments" style="font-size:.8rem;color:var(--blue);text-decoration:none;">View all</a>
+                </div>
+                @if (!Model.UpcomingAppointments.Any())
+                {
+                    <p style="padding:1.5rem;color:var(--gray-400);text-align:center;">No upcoming appointments.</p>
+                }
+                else
+                {
+                    <div class="appt-list">
+                        @foreach (var a in Model.UpcomingAppointments)
+                        {
+                            <div class="appt-row">
+                                <div class="avatar-mini">@a.DoctorInitials</div>
+                                <div class="appt-info">
+                                    <strong>@a.DoctorName</strong>
+                                    <span>@a.Specialization — @a.Date.ToString("MMM dd, h:mm tt")</span>
+                                </div>
+                                <span class="badge badge-confirmed">@a.State</span>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="dash-card">
+                <div class="card-header">
+                    <h3>Recent Prescriptions</h3>
+                    <a asp-controller="PatientDashboard" asp-action="Prescriptions" style="font-size:.8rem;color:var(--blue);text-decoration:none;">View all</a>
+                </div>
+                @if (!Model.RecentPrescriptions.Any())
+                {
+                    <p style="padding:1.5rem;color:var(--gray-400);text-align:center;">No prescriptions yet.</p>
+                }
+                else
+                {
+                    <div class="appt-list">
+                        @foreach (var rx in Model.RecentPrescriptions)
+                        {
+                            <div class="appt-row">
+                                <div class="avatar-mini">@rx.DoctorInitials</div>
+                                <div class="appt-info">
+                                    <strong>@rx.DoctorName</strong>
+                                    <span>@rx.Diagnosis — @rx.CreatedAt.ToString("MMM dd")</span>
+                                </div>
+                                <span class="badge badge-active">@rx.MedicineCount Rx</span>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+    </main>
+</div>

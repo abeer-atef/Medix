@@ -1,0 +1,86 @@
+@model Midix.ViewModel.DoctorOverviewViewModel
+@using Midix.Models
+
+@{
+    ViewData["Title"] = "Doctor Dashboard";
+    ViewData["ActiveTab"] = "overview";
+    var hour = DateTime.Now.Hour;
+    var greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+}
+
+@section Styles {
+    <style>
+                         #navbar {
+                             display: none;
+                         }
+
+                         body {
+                             background: var(--gray-50);
+                         }
+
+                         .sidebar-link.logout-btn {
+                             width: 100%;
+                             background: none;
+                             border: none;
+                             cursor: pointer;
+                             text-align: left;
+                             display: flex;
+                             align-items: center;
+                             gap: 10px;
+                             padding: 10px 14px;
+                             border-radius: var(--radius-sm);
+                             font-size: 14px;
+                             font-weight: 500;
+                             color: var(--gray-600);
+                             transition: var(--transition);
+                         }
+
+                             .sidebar-link.logout-btn:hover {
+                                 background: #fff0f0;
+                                 color: #e53e3e;
+        }</style>
+    }
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div style="background:var(--green-light);color:var(--green);padding:12px 20px;border-radius:var(--radius-sm);margin-bottom:16px;display:flex;align-items:center;gap:10px;border:1px solid rgba(22,163,74,.2);">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <div class="dashboard-layout">
+
+        @await Html.PartialAsync("_DoctorSidebar", (Midix.ViewModel.DoctorHeaderInfo)Model)
+
+        <main class="dashboard-main">
+
+            <div class="dashboard-header teal-header">
+                <div>
+                    <h1>@greeting, @Model.DoctorName! 👋</h1>
+                    <p>You have <strong>@Model.TodayTotal patient@(Model.TodayTotal == 1 ? "" : "s")</strong> scheduled for today.</p>
+                </div>
+                <div class="date-badge">
+                    <i class="fas fa-calendar"></i> @DateTime.Now.ToString("MMMM d, yyyy")
+                </div>
+            </div>
+
+            <div class="stats-row">
+                <div class="stat-card teal"><div class="stat-icon"><i class="fas fa-user-injured"></i></div><div class="stat-info"><span class="stat-value">@Model.TodayTotal</span><span class="stat-label">Today's Patients</span></div></div>
+                <div class="stat-card blue"><div class="stat-icon"><i class="fas fa-check-circle"></i></div><div class="stat-info"><span class="stat-value">@Model.TodayCompleted</span><span class="stat-label">Completed</span></div></div>
+                <div class="stat-card orange"><div class="stat-icon"><i class="fas fa-hourglass-half"></i></div><div class="stat-info"><span class="stat-value">@Model.TodayRemaining</span><span class="stat-label">Remaining</span></div></div>
+                <div class="stat-card green"><div class="stat-icon"><i class="fas fa-clock"></i></div><div class="stat-info"><span class="stat-value">@Model.AvgVisitMinutes</span><span class="stat-label">Avg. Visit (min)</span></div></div>
+            </div>
+
+           
+
+            <div class="dash-card" style="padding:1.5rem;">
+                <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+                    <a asp-controller="DoctorDashboard" asp-action="Schedule" class="btn btn-teal"><i class="fas fa-calendar-day"></i> Today's Schedule</a>
+                    <a asp-controller="DoctorDashboard" asp-action="Patients" class="btn btn-outline"><i class="fas fa-users"></i> My Patients</a>
+                    <a asp-controller="DoctorDashboard" asp-action="Availability" class="btn btn-outline"><i class="fas fa-clock"></i> Manage Availability</a>
+
+                </div>
+            </div>
+
+        </main>
+    </div>

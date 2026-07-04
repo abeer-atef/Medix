@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Medix</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+
+    <!-- Medix Stylesheet -->
+    <link rel="stylesheet" href="~/css/medix.css" asp-append-version="true" />
+
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+
+    <!-- ==================== NAVIGATION ==================== -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <div class="logo-icon"><i class="fas fa-heartbeat"></i></div>
+                <span class="logo-text">Med<strong>ix</strong></span>
+            </div>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="@Url.Action("Index", "Home")" class="nav-link">Home</a></li>
+                <li><a href="#services" class="nav-link">Services</a></li>
+                <li><a href="@Url.Action("Doctors", "Home")" class="nav-link">Doctors</a></li>
+                <li><a href="@Url.Action("Index", "Pharmacy")" class="nav-link">Pharmacy</a></li>
+                <li><a href="#about" class="nav-link">About</a></li>
+            </ul>
+            <div class="nav-actions">
+                @if (User.Identity != null && User.Identity.IsAuthenticated)
+                {
+                    string dashboardController = User.IsInRole("Admin") ? "AdminDashboard"
+                    : User.IsInRole("Doctor") ? "DoctorDashboard"
+                    : "PatientDashboard";
+
+                    <a href="@Url.Action("Index", dashboardController)" class="btn btn-primary">
+                        <i class="fas fa-th-large"></i> Dashboard
+                    </a>
+                    <form asp-controller="Account" asp-action="Logout" method="post" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-outline">Log Out</button>
+                    </form>
+                }
+                else
+                {
+                    <a href="@Url.Action("Login", "Account")" class="btn btn-outline">Log In</a>
+                    <a href="@Url.Action("Register", "Account")" class="btn btn-primary">Sign Up</a>
+                }
+            </div>
+            <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Content -->
+    <main>
+        @RenderBody()
+    </main>
+
+    <!-- ==================== AI CHATBOT WIDGET ==================== -->
+    <div class="chatbot-widget" id="chatbot-widget">
+        <button class="chatbot-toggle" id="chatbot-toggle" onclick="toggleChatbot()">
+            <i class="fas fa-robot" id="chat-icon"></i>
+            <span class="chat-notification">1</span>
+        </button>
+        <div class="chatbot-window" id="chatbot-window">
+            <div class="chat-header">
+                <div class="chat-header-info">
+                    <div class="chat-avatar"><i class="fas fa-robot"></i></div>
+                    <div>
+                        <strong>MediBot AI</strong>
+                        <span class="online-dot">? Online</span>
+                    </div>
+                </div>
+                <button class="chat-close" onclick="toggleChatbot()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <div class="chat-message bot">
+                    <div class="msg-avatar"><i class="fas fa-robot"></i></div>
+                    <div class="msg-bubble">
+                        <p>Hello! ?? I'm MediBot, your AI assistant.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="chat-input" placeholder="Type your message..." onkeypress="handleChatKey(event)" />
+                <button class="send-btn" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== TOAST NOTIFICATION ==================== -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toast-message">Action completed successfully!</span>
+    </div>
+
+    <script src="~/js/navigation.js" asp-append-version="true"></script>
+    <script src="~/js/doctor-filters.js" asp-append-version="true"></script>
+    <script src="~/js/chatbot.js" asp-append-version="true"></script>
+    <script src="~/js/medix.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

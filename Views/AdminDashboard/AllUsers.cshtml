@@ -1,0 +1,108 @@
+@model Midix.ViewModel.AllUsersViewModel
+
+@{
+    ViewData["Title"] = "Admins";
+    ViewData["UsersTab"] = "admins";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/users-dashboard.css" />
+}
+
+<div class="page-header">
+    <div class="header-content">
+        <div class="header-icon">
+            <i class="fas fa-user-shield"></i>
+        </div>
+        <div>
+            <h1>All Administrators</h1>
+            <p class="page-subtitle">
+                Manage administrators and monitor system access.
+            </p>
+        </div>
+    </div>
+
+    <a asp-controller="AdminDashboard" asp-action="Index" class="btn-dashboard">
+        <i class="fas fa-arrow-left"></i> Dashboard
+    </a>
+</div>
+
+@await Html.PartialAsync("_UsersTabsNav")
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-label">Total Admins</div>
+        <div class="stat-number">
+            @Model.AdminsPagination.TotalItems
+        </div>
+    </div>
+</div>
+
+<div class="dash-card">
+    <div class="appointments-table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                    <th>Joined</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var a in Model.Admins)
+                {
+                    <tr>
+                        <td>
+                            <div class="user-cell">
+                                <div class="avatar-mini avatar-admin">@a.Initials</div>
+                                @a.FullName
+                            </div>
+                        </td>
+                        <td>@a.Email</td>
+                        <td>@(string.IsNullOrEmpty(a.PhoneNumber) ? "—" : a.PhoneNumber)</td>
+                        <td>
+                            @if (a.IsActive)
+                            {
+                                <span class="badge badge-active">Active</span>
+                            }
+                            else
+                            {
+
+                                <span class="badge badge-inactive">Inactive</span>
+                            }
+                        </td>
+                        <td>@a.CreatedAt.ToString("MMM dd, yyyy")</td>
+                    </tr>
+                }
+                @if (!Model.Admins.Any())
+                {
+                    <tr><td colspan="5" style="text-align:center;color:var(--gray-400);padding:2rem;">No admins found.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @{
+        var p = Model.AdminsPagination;
+        int start = Math.Max(1, p.CurrentPage - 2);
+        int end = Math.Min(p.TotalPages, p.CurrentPage + 2);
+    }
+    @if (p.TotalPages > 1)
+    {
+        <div class="pagination-bar">
+            <span>Page @p.CurrentPage of @p.TotalPages (@p.TotalItems admins)</span>
+            <div class="pagination-controls">
+                <a asp-action="AllUsers" asp-route-page="1" asp-route-pageSize="@p.PageSize" class="page-btn @(!p.HasPrevious ? "disabled" : "")"><i class="fas fa-angle-double-left"></i></a>
+                <a asp-action="AllUsers" asp-route-page="@(p.CurrentPage - 1)" asp-route-pageSize="@p.PageSize" class="page-btn @(!p.HasPrevious ? "disabled" : "")"><i class="fas fa-angle-left"></i></a>
+                @for (int pg = start; pg <= end; pg++)
+                {
+                    <a asp-action="AllUsers" asp-route-page="@pg" asp-route-pageSize="@p.PageSize" class="page-btn @(pg == p.CurrentPage ? "current" : "")">@pg</a>
+                }
+                <a asp-action="AllUsers" asp-route-page="@(p.CurrentPage + 1)" asp-route-pageSize="@p.PageSize" class="page-btn @(!p.HasNext ? "disabled" : "")"><i class="fas fa-angle-right"></i></a>
+                <a asp-action="AllUsers" asp-route-page="@p.TotalPages" asp-route-pageSize="@p.PageSize" class="page-btn @(!p.HasNext ? "disabled" : "")"><i class="fas fa-angle-double-right"></i></a>
+            </div>
+        </div>
+    }
+</div>

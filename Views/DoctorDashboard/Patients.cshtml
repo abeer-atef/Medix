@@ -1,0 +1,193 @@
+@model Midix.ViewModel.DoctorPatientsViewModel
+@using Midix.Models
+
+@{
+    ViewData["Title"] = "My Patients";
+    ViewData["ActiveTab"] = "patients";
+}
+
+@section Styles {
+    <style>
+        #navbar {
+            display: none;
+        }
+
+        body {
+            background: var(--gray-50);
+        }
+
+        .sidebar-link.logout-btn {
+            width: 100%;
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--gray-600);
+            transition: var(--transition);
+        }
+
+            .sidebar-link.logout-btn:hover {
+                background: #fff0f0;
+                color: #e53e3e;
+            }
+
+        .pagination-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: .75rem 1rem;
+            border-top: 1px solid var(--gray-100);
+            font-size: .875rem;
+            color: var(--gray-500);
+            flex-wrap: wrap;
+            gap: .5rem;
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: .4rem;
+            align-items: center;
+        }
+
+        .page-btn {
+            padding: .3rem .7rem;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-sm);
+            background: #fff;
+            color: var(--gray-700);
+            text-decoration: none;
+            font-size: .8rem;
+            transition: .15s;
+        }
+
+            .page-btn:hover {
+                background: var(--teal);
+                color: #fff;
+                border-color: var(--teal);
+            }
+
+            .page-btn.disabled {
+                opacity: .4;
+                cursor: not-allowed;
+                pointer-events: none;
+            }
+
+            .page-btn.current {
+                background: var(--teal);
+                color: #fff;
+                border-color: var(--teal);
+                font-weight: 700;
+            }
+    </style>
+}
+
+<div class="dashboard-layout">
+
+    @await Html.PartialAsync("_DoctorSidebar", (Midix.ViewModel.DoctorHeaderInfo)Model)
+
+    <main class="dashboard-main">
+
+        <div class="dashboard-header teal-header">
+            <div>
+                <h1>My Patients</h1>
+                <p>Patients you've seen, with their visit history</p>
+            </div>
+        </div>
+
+        <div class="dash-card">
+            @if (!Model.Patients.Any())
+            {
+                <div style="text-align:center;padding:40px;color:var(--gray-400);">
+                    <i class="fas fa-users" style="font-size:40px;display:block;margin-bottom:12px;"></i>
+                    No completed appointments yet.
+                </div>
+            }
+            else
+            {
+                <div class="appointments-table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Patient</th>
+                                <th>Age</th>
+                                <th>Last Visit</th>
+                                <th>Last Diagnosis</th>
+                                <th>Prescriptions</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var p in Model.Patients)
+                            {
+                                <tr>
+                                    <td>
+                                        <div style="display:flex;align-items:center;gap:10px;">
+                                            <div class="avatar-mini">@p.Initials</div>
+                                            @p.FullName
+                                        </div>
+                                    </td>
+                                    <td>@p.Age yrs</td>
+                                    <td>@p.LastVisit</td>
+                                    <td>@p.LastDiagnosis</td>
+                                    <td>
+                                        <span style="background:var(--teal-light);color:var(--teal);padding:2px 10px;border-radius:2rem;font-size:12px;font-weight:700;">
+                                            @p.ActivePrescriptions Rx
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a asp-controller="DoctorDashboard" asp-action="WritePrescription"
+                                           asp-route-appointmentId="@p.LastAppointmentId"
+                                           class="btn-sm btn-teal" style="text-decoration:none;">
+                                            <i class="fas fa-file-prescription"></i> View Last Visit
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+
+            }
+            @{
+                var pg = Model.Pagination;
+                int start = Math.Max(1, pg.CurrentPage - 2);
+                int end = Math.Min(pg.TotalPages, pg.CurrentPage + 2);
+            }
+
+            @if (pg.TotalPages > 1)
+            {
+                <div class="pagination-bar">
+                    <span>Page @pg.CurrentPage of @pg.TotalPages (@pg.TotalItems patients)</span>
+                    <div class="pagination-controls">
+                        <a asp-action="Patients" asp-route-page="1" asp-route-pageSize="@pg.PageSize"
+                           class="page-btn @(!pg.HasPrevious ? "disabled" : "")"><i class="fas fa-angle-double-left"></i></a>
+
+                        <a asp-action="Patients" asp-route-page="@(pg.CurrentPage - 1)" asp-route-pageSize="@pg.PageSize"
+                           class="page-btn @(!pg.HasPrevious ? "disabled" : "")"><i class="fas fa-angle-left"></i></a>
+
+                        @for (int i = start; i <= end; i++)
+                        {
+                            <a asp-action="Patients" asp-route-page="@i" asp-route-pageSize="@pg.PageSize"
+                               class="page-btn @(i == pg.CurrentPage ? "current" : "")">@i</a>
+                        }
+
+                        <a asp-action="Patients" asp-route-page="@(pg.CurrentPage + 1)" asp-route-pageSize="@pg.PageSize"
+                           class="page-btn @(!pg.HasNext ? "disabled" : "")"><i class="fas fa-angle-right"></i></a>
+
+                        <a asp-action="Patients" asp-route-page="@pg.TotalPages" asp-route-pageSize="@pg.PageSize"
+                           class="page-btn @(!pg.HasNext ? "disabled" : "")"><i class="fas fa-angle-double-right"></i></a>
+                    </div>
+                </div>
+            }
+        </div>
+
+    </main>
+</div>

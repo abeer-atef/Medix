@@ -1,0 +1,149 @@
+@model Midix.ViewModel.BookAppointmentViewModel
+
+@{
+    ViewData["Title"]     = "Select Date & Time";
+    ViewData["ActiveTab"] = "book";
+}
+
+@section Styles {
+<style>
+    body { background: var(--gray-50); }
+
+        #navbar {
+            display: none;
+        }
+    .sidebar-link.logout-btn {
+        width: 100%; background: none; border: none; cursor: pointer; text-align: left;
+        display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+        border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; color: var(--gray-600);
+        transition: var(--transition);
+    }
+    .sidebar-link.logout-btn:hover { background: #fff0f0; color: #e53e3e; }
+
+    .booking-card { max-width: 640px; background: #fff; border-radius: var(--radius);
+                    box-shadow: var(--shadow-sm); padding: 2rem; }
+    .doc-summary { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;
+                   padding-bottom: 1.25rem; border-bottom: 1px solid var(--gray-100); }
+    .doc-summary .doc-avatar {
+        width: 56px; height: 56px; border-radius: 50%;
+        background: var(--blue-light); color: var(--blue); font-weight: 700;
+        display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+    }
+    .form-label { display: block; font-size: .8rem; font-weight: 700; color: var(--gray-600);
+                  text-transform: uppercase; letter-spacing: .05em; margin-bottom: .5rem; }
+    input[type="date"] {
+        padding: .6rem .9rem; border: 1.5px solid var(--gray-200); border-radius: var(--radius-sm);
+        font-size: .9rem; width: 100%; box-sizing: border-box; margin-bottom: 1.5rem;
+    }
+    .slots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px,1fr)); gap: .6rem; }
+    .slot-btn {
+        padding: .6rem; border: 1.5px solid var(--gray-200); border-radius: var(--radius-sm);
+        background: #fff; font-size: .85rem; font-weight: 600; color: var(--gray-700);
+        text-align: center; text-decoration: none; transition: .15s;
+    }
+    .slot-btn:hover { border-color: var(--blue); color: var(--blue); }
+    .slot-btn.booked { background: var(--gray-100); color: var(--gray-400); pointer-events: none; text-decoration: line-through; }
+    #slotsMsg { color: var(--gray-400); font-size: .875rem; padding: 1rem 0; }
+</style>
+}
+
+<div class="dashboard-layout">
+
+    @await Html.PartialAsync("_PatientSidebar", (Midix.ViewModel.PatientHeaderInfo)Model)
+
+    <main class="dashboard-main">
+
+        <div class="dashboard-header blue-header">
+            <div>
+                <h1>Select Date &amp; Time</h1>
+                <p>Step 2 of 3 — Choose when you'd like to visit</p>
+            </div>
+            <a asp-controller="PatientDashboard" asp-action="BookAppointment" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Change Doctor
+            </a>
+        </div>
+
+        <div class="booking-card">
+            <div class="doc-summary">
+                <div class="doc-avatar">@Model.SelectedDoctorName?.Substring(4, Math.Min(2, Math.Max(0, (Model.SelectedDoctorName?.Length ?? 4) - 4)))</div>
+                <div>
+                    <div style="font-weight:700;color:var(--gray-900);">@Model.SelectedDoctorName</div>
+                    <div style="font-size:.85rem;color:var(--gray-500);">@Model.SelectedSpec · $@Model.SelectedFee.ToString("0")</div>
+                </div>
+            </div>
+
+            <form method="get" asp-controller="PatientDashboard" asp-action="SelectTime">
+                <input type="hidden" name="doctorId" value="@Model.SelectedDoctorId" />
+                <label class="form-label" for="date">Appointment Date</label>
+                <input type="date" id="date" name="date" value="@Model.SelectedDate"
+                       min="@DateTime.Now.ToString("yyyy-MM-dd")"
+                       onchange="this.form.submit()" />
+            </form>
+
+            <label class="form-label">Visit Type</label>
+            <div class="pay-options" style="margin-bottom:1.5rem;">
+                <label class="pay-option">
+                    <input type="radio" name="visitTypeRadio" value="NewVisit" checked
+                           onchange="selectedType='NewVisit'; loadSlots();" />
+                    <i class="fas fa-stethoscope"></i>
+                    <span>New Visit (كشف)</span>
+                </label>
+                <label class="pay-option">
+                    <input type="radio" name="visitTypeRadio" value="FollowUp"
+                           onchange="selectedType='FollowUp'; loadSlots();" />
+                    <i class="fas fa-redo"></i>
+                    <span>Follow-Up (إعادة)</span>
+                </label>
+            </div>
+
+            <label class="form-label">Available Time Slots</label>
+            <div id="slotsContainer">
+                <div id="slotsMsg">Loading available times…</div>
+                <div class="slots-grid" id="slotsGrid"></div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+@section Scripts {
+    <script>
+        const doctorId = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.SelectedDoctorId));
+        const date = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.SelectedDate));
+        let selectedType = 'NewVisit';
+
+        async function loadSlots() {
+            const msg = document.getElementById('slotsMsg');
+            const grid = document.getElementById('slotsGrid');
+            grid.innerHTML = '';
+            msg.style.display = 'block';
+            msg.textContent = 'Loading available times…';
+
+            try {
+                const res = await fetch(`/PatientDashboard/GetAvailableSlots?doctorId=${encodeURIComponent(doctorId)}&date=${encodeURIComponent(date)}`);
+                const data = await res.json();
+
+                if (!data.availableSlots || data.availableSlots.length === 0) {
+                    msg.textContent = 'No available time slots for this date.';
+                    return;
+                }
+                msg.style.display = 'none';
+
+                data.availableSlots.forEach(time => {
+                    const isBooked = (data.bookedSlots || []).includes(time);
+                    const a = document.createElement(isBooked ? 'span' : 'a');
+                    a.className = 'slot-btn' + (isBooked ? ' booked' : '');
+                    a.textContent = time;
+                    if (!isBooked) {
+                        a.href = `/PatientDashboard/ConfirmBooking?doctorId=${encodeURIComponent(doctorId)}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(time)}&appointmentType=${selectedType}`;
+                    }
+                    grid.appendChild(a);
+                });
+            } catch {
+                msg.textContent = 'Could not load available times. Please try again.';
+            }
+        }
+
+        loadSlots();
+    </script>
+}

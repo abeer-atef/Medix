@@ -1,0 +1,226 @@
+﻿@model Midix.ViewModel.EditDoctorViewModel
+
+@{
+    ViewData["Title"] = "Edit Doctor";
+}
+
+@section Styles {
+    <style>
+        #navbar {
+            display: none;
+        }
+
+        body {
+            background: var(--gray-50);
+        }
+
+        .form-card {
+            max-width: 760px;
+            margin: 2rem auto;
+            background: #fff;
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+            .form-card h2 {
+                font-family: var(--font-heading);
+                font-weight: 700;
+                color: var(--gray-900);
+                margin-bottom: 1.5rem;
+                display: flex;
+                align-items: center;
+                gap: .6rem;
+            }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        @@media (max-width: 640px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: .4rem;
+            margin-bottom: 1rem;
+        }
+
+            .form-group label {
+                font-size: .85rem;
+                font-weight: 600;
+                color: var(--gray-700);
+            }
+
+            .form-group input, .form-group select, .form-group textarea {
+                padding: .6rem .9rem;
+                border: 1.5px solid var(--gray-200);
+                border-radius: var(--radius-sm);
+                font-size: .9rem;
+                color: var(--gray-900);
+                transition: border-color .2s;
+            }
+
+                .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+                    outline: none;
+                    border-color: var(--blue);
+                }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding: .75rem 1rem;
+            background: var(--gray-50);
+            border-radius: var(--radius-sm);
+            margin-bottom: 1.5rem;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+        }
+
+            .toggle-switch input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+
+        .toggle-slider {
+            position: absolute;
+            inset: 0;
+            background: var(--gray-300);
+            border-radius: 24px;
+            cursor: pointer;
+            transition: .3s;
+        }
+
+            .toggle-slider:before {
+                content: "";
+                position: absolute;
+                width: 18px;
+                height: 18px;
+                left: 3px;
+                bottom: 3px;
+                background: #fff;
+                border-radius: 50%;
+                transition: .3s;
+            }
+
+        input:checked + .toggle-slider {
+            background: var(--blue);
+        }
+
+            input:checked + .toggle-slider:before {
+                transform: translateX(20px);
+            }
+
+        .form-actions {
+            display: flex;
+            gap: .75rem;
+            justify-content: flex-end;
+            margin-top: 1rem;
+        }
+    </style>
+}
+
+<div class="form-card">
+    <h2>
+        <i class="fas fa-user-edit" style="color:var(--blue)"></i>
+        Edit Doctor
+    </h2>
+
+    <form asp-controller="AdminDashboard" asp-action="EditDoctor" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="UserId" />
+
+        <div class="form-row">
+            <div class="form-group">
+                <label asp-for="FirstName"></label>
+                <input asp-for="FirstName" />
+                <span asp-validation-for="FirstName" class="text-danger" style="font-size:.8rem;"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="LastName"></label>
+                <input asp-for="LastName" />
+                <span asp-validation-for="LastName" class="text-danger" style="font-size:.8rem;"></span>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label asp-for="PhoneNumber"></label>
+                <input asp-for="PhoneNumber" />
+                <span asp-validation-for="PhoneNumber" class="text-danger" style="font-size:.8rem;"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SpecializationId"></label>
+                <select asp-for="SpecializationId" asp-items="Model.Specializations">
+                    <option value="">— Select Specialization —</option>
+                </select>
+                <span asp-validation-for="SpecializationId" class="text-danger" style="font-size:.8rem;"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="ConsultationFee"></label>
+            <input asp-for="ConsultationFee" type="number" step="0.01" />
+            <span asp-validation-for="ConsultationFee" class="text-danger" style="font-size:.8rem;"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="FollowUpFee"></label>
+            <input asp-for="FollowUpFee" type="number" step="0.01" />
+            <span asp-validation-for="FollowUpFee" class="text-danger" style="font-size:.8rem;"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="ClinicAddress"></label>
+            <input asp-for="ClinicAddress" />
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Bio"></label>
+            <textarea asp-for="Bio" rows="3"></textarea>
+        </div>
+
+        <div class="toggle-row">
+            <label class="toggle-switch">
+                <input type="checkbox" asp-for="IsActive" />
+                <span class="toggle-slider"></span>
+            </label>
+            <div>
+                <strong style="font-size:.9rem;">Account Status</strong>
+                <p style="font-size:.8rem;color:var(--gray-500);margin:0;">
+                    Toggle to activate or deactivate this doctor's account.
+                </p>
+            </div>
+        </div>
+
+        <div asp-validation-summary="ModelOnly" class="text-danger" style="margin-bottom:1rem;font-size:.85rem;"></div>
+
+        <div class="form-actions">
+            <a asp-controller="AdminDashboard" asp-action="Index"
+               class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-orange">
+                <i class="fas fa-save"></i> Save Changes
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

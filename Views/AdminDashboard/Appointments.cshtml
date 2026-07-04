@@ -1,0 +1,137 @@
+@model Midix.ViewModel.AppointmentsViewModel
+@using Midix.Models
+@using Midix.Enums
+
+@{
+    ViewData["Title"] = "All Appointments";
+    ViewData["ActiveTab"] = "appointments";
+}
+
+@section Styles {
+    <style>
+        #navbar { display: none; }
+        body { background: var(--gray-50); }
+
+        .pagination-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: .75rem 1rem; border-top: 1px solid var(--gray-100);
+            font-size: .875rem; color: var(--gray-500); flex-wrap: wrap; gap: .5rem;
+        }
+        .pagination-controls { display: flex; gap: .4rem; align-items: center; }
+        .page-btn {
+            padding: .3rem .7rem; border: 1px solid var(--gray-200);
+            border-radius: var(--radius-sm); background: #fff;
+            color: var(--gray-700); text-decoration: none; font-size: .8rem;
+            transition: .15s;
+        }
+        .page-btn:hover  { background: var(--blue); color: #fff; border-color: var(--blue); }
+        .page-btn.disabled { opacity: .4; cursor: not-allowed; pointer-events: none; }
+        .page-btn.current  { background: var(--blue); color: #fff; border-color: var(--blue); font-weight: 700; }
+
+        .filter-form { display: flex; gap: .75rem; flex-wrap: wrap; align-items: center; }
+    </style>
+}
+
+<div class="dashboard-layout">
+
+    @await Html.PartialAsync("_AdminSidebar")
+
+    <main class="dashboard-main">
+
+        <div class="dashboard-header admin-header">
+            <div>
+                <h1>Global Appointments</h1>
+                <p>All appointments across the system</p>
+            </div>
+            <div class="header-actions">
+                <span class="date-badge">
+                    <i class="fas fa-calendar"></i> @DateTime.Now.ToString("MMM dd, yyyy")
+                </span>
+            </div>
+        </div>
+
+        <div class="card-header-row">
+            <h2>Appointments</h2>
+        </div>
+
+        <div class="dash-card appointments-table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Appt. ID</th>
+                        <th>Patient</th>
+                        <th>Doctor</th>
+                        <th>Date &amp; Time</th>
+                        <th>Payment</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in Model.Appointments)
+                    {
+                        var stateBadge = a.State switch
+                        {
+                            AppointmentState.Confirmed => "badge-confirmed",
+                            AppointmentState.Done => "badge-completed",
+                            AppointmentState.InProgress => "badge-warning",    
+                            AppointmentState.Cancelled => "badge-danger",
+                            _ => "badge-pending"
+                        };
+                        <tr>
+                            <td><code>APT-@a.Id.ToString("D4")</code></td>
+                            <td>@a.PatientName</td>
+                            <td>@a.DoctorName</td>
+                            <td>@a.Date.ToString("MMM dd — h:mm tt")</td>
+                            <td>
+                                @if (a.PaymentAmount.HasValue)
+                                {
+                                    var payBadge = a.PaymentStatus == PaymentStatus.Paid ? "badge-paid" : "badge-cash";
+                                    <span class="badge @payBadge">
+                                        @a.PaymentMethod $@a.PaymentAmount.Value.ToString("0")
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-inactive">—</span>
+                                }
+                            </td>
+                            <td><span class="badge @stateBadge">@a.State</span></td>
+                        </tr>
+                    }
+                    @if (!Model.Appointments.Any())
+                    {
+                        <tr><td colspan="6" style="text-align:center;color:var(--gray-400);padding:2rem;">No appointments found.</td></tr>
+                    }
+                </tbody>
+            </table>
+
+            @{
+                var p = Model.Pagination;
+                int start = Math.Max(1, p.CurrentPage - 2);
+                int end   = Math.Min(p.TotalPages, p.CurrentPage + 2);
+            }
+            @if (p.TotalPages > 1)
+            {
+                <div class="pagination-bar">
+                    <span>Showing page @p.CurrentPage of @p.TotalPages (@p.TotalItems appointments)</span>
+                    <div class="pagination-controls">
+                        <a asp-action="Appointments" asp-route-page="1" asp-route-pageSize="@p.PageSize"
+                           class="page-btn @(!p.HasPrevious ? "disabled" : "")"><i class="fas fa-angle-double-left"></i></a>
+                        <a asp-action="Appointments" asp-route-page="@(p.CurrentPage - 1)" asp-route-pageSize="@p.PageSize"
+                           class="page-btn @(!p.HasPrevious ? "disabled" : "")"><i class="fas fa-angle-left"></i></a>
+                        @for (int pg = start; pg <= end; pg++)
+                        {
+                            <a asp-action="Appointments" asp-route-page="@pg" asp-route-pageSize="@p.PageSize"
+                               class="page-btn @(pg == p.CurrentPage ? "current" : "")">@pg</a>
+                        }
+                        <a asp-action="Appointments" asp-route-page="@(p.CurrentPage + 1)" asp-route-pageSize="@p.PageSize"
+                           class="page-btn @(!p.HasNext ? "disabled" : "")"><i class="fas fa-angle-right"></i></a>
+                        <a asp-action="Appointments" asp-route-page="@p.TotalPages" asp-route-pageSize="@p.PageSize"
+                           class="page-btn @(!p.HasNext ? "disabled" : "")"><i class="fas fa-angle-double-right"></i></a>
+                    </div>
+                </div>
+            }
+        </div>
+
+    </main>
+</div>
