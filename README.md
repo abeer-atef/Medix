@@ -2,7 +2,7 @@
 
 **Medix** is a full-featured medical appointment and healthcare management platform built with ASP.NET Core MVC. It connects patients, doctors, and pharmacies in one system — handling everything from booking appointments to AI-assisted prescription reading.
 
-> 🎓 This project was built as a graduation project for the **Digital Egypt Builders Initiative (DEPI) — Full Stack .NET Track**.
+> 🎓 This project was built as a graduation project for the **Digital Egypt Pioneers Initiative (DEPI) — Full Stack .NET Track**.
 
 🔗 **Live Demo:** [medix-app-2026-ewaha0f0ayeggucf.japanwest-01.azurewebsites.net](https://medix-app-2026-ewaha0f0ayeggucf.japanwest-01.azurewebsites.net/)
 
