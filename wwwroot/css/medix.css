@@ -1,4 +1,3 @@
-
 /* ---------- CSS Variables ---------- */
 :root {
     --blue: #1a73e8;
@@ -1648,6 +1647,16 @@ button {
     border-top: 1px solid var(--gray-100);
 }
 
+.sidebar-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--gray-700);
+    cursor: pointer;
+    padding: 4px 8px;
+}
+
 .dashboard-main {
     flex: 1;
     padding: 28px;
@@ -1981,7 +1990,7 @@ button {
 }
 
 .in-progress-active {
-    background-color: #fffaf0; 
+    background-color: #fffaf0;
     border-left: 4px solid #ecc94b;
 }
 
@@ -1989,6 +1998,7 @@ button {
     background-color: #ecc94b;
     color: white;
 }
+
 .badge-paid {
     background: var(--green-light);
     color: var(--green);
@@ -4746,29 +4756,48 @@ input:checked + .toggle-slider {
         width: 100%;
         height: auto;
         position: static;
-        flex-direction: row;
-        flex-wrap: wrap;
+        flex-direction: column;
         padding: 12px;
     }
 
-    .sidebar-nav {
-        flex-direction: row;
-        flex-wrap: wrap;
-    }
-
     .sidebar-brand {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         border-bottom: none;
         padding-bottom: 0;
+        width: 100%;
     }
 
-    .sidebar-user {
-        display: none;
+    .sidebar-toggle {
+        display: block;
     }
 
+    .sidebar-user,
+    .sidebar-nav,
     .sidebar-footer {
-        margin-top: 0;
-        padding-top: 0;
-        border-top: none;
+        display: none;
+        width: 100%;
+    }
+
+    .sidebar-nav {
+        flex-direction: column;
+        margin-top: 12px;
+    }
+
+    .sidebar.open .sidebar-user {
+        display: flex;
+    }
+
+    .sidebar.open .sidebar-nav {
+        display: flex;
+    }
+
+    .sidebar.open .sidebar-footer {
+        display: block;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--gray-100);
     }
 
     .dashboard-main {

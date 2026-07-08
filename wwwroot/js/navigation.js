@@ -1,15 +1,10 @@
-/* ============================================================
-   Medix - Navigation & Navbar
-   Handles: top-level page switching, mobile menu toggle,
-   auth form switching (login/register tabs), password visibility toggle.
-   ============================================================ */
+
 
 "use strict";
 
 // ==================== PAGE NAVIGATION ====================
 
 function showPage(pageId) {
-    // 1. إخفاء كل الصفحات
     const allPages = document.querySelectorAll(".page");
     allPages.forEach((page) => {
         page.classList.remove("active");
@@ -22,7 +17,6 @@ function showPage(pageId) {
         console.error("Page with id 'page-" + pageId + "' not found!");
     }
 
-    // 2. تحديث الروابط في النافبار
     const allLinks = document.querySelectorAll(".nav-link");
     allLinks.forEach((link) => {
         link.classList.remove("active");
@@ -33,13 +27,11 @@ function showPage(pageId) {
         }
     });
 
-    // 3. قفل منيو الموبايل (مع التأكد من وجود العنصر)
     const navLinks = document.getElementById("navLinks");
     if (navLinks && navLinks.classList.contains("active")) {
         navLinks.classList.remove("active");
     }
 
-    // 4. السكرول يطلع فوق
     window.scrollTo({
         top: 0,
         behavior: "smooth",
@@ -73,6 +65,13 @@ function toggleMenu() {
     if (navLinks) {
         navLinks.classList.toggle("open");
         hamburger.classList.toggle("active");
+    }
+}
+
+function toggleSidebar() {
+    const sidebar = document.querySelector(".sidebar");
+    if (sidebar) {
+        sidebar.classList.toggle("open");
     }
 }
 
