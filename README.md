@@ -100,7 +100,6 @@ dotnet run
 Or, if you're using Visual Studio, just press **F5** (or the green "Run" button).
 
 The seed data automatically creates:
-- A default **Admin** account (`admin@medix.com` / `Admin@123`) — change this password after first login
 - Default specializations (Cardiology, Neurology, Dentistry, etc.)
 
 ---
