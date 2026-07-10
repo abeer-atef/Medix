@@ -9,7 +9,6 @@ using Midix.IRepository.IDoctor;
 using Midix.IRepository.IPatient;
 using Midix.IRepository.IRating;
 using Midix.Models;
-using Midix.Repositories;
 using Midix.Repository;
 using Midix.Repository.AdminRepositories;
 using Midix.Repository.DoctorRepositories;
@@ -67,7 +66,6 @@ namespace Midix
 
             builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 
-            builder.Services.AddScoped<IPharmacyRepository, PharmacyRepository>();
 
             builder.Services.AddScoped<IPatientOverviewRepository, PatientOverviewRepository>();
             builder.Services.AddScoped<IPatientBookingRepository, PatientBookingRepository>();

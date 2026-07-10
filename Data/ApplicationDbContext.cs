@@ -22,7 +22,6 @@ namespace Midix.Data
         public DbSet<Prescription> Prescriptions => Set<Prescription>();
         public DbSet<Medicine> Medicines => Set<Medicine>();
         public DbSet<Payment> Payments => Set<Payment>();
-        public DbSet<Pharmacy> Pharmacies => Set<Pharmacy>();
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -162,7 +161,7 @@ namespace Midix.Data
                 e.Property(pr => pr.UploadedAt)
                  .IsRequired()
                  .HasDefaultValueSql("GETUTCDATE()");
-     
+
             });
 
             builder.Entity<Medicine>(e =>
@@ -196,13 +195,6 @@ namespace Midix.Data
                 e.Property(p => p.Tax).HasColumnType("decimal(10,2)");
                 e.Property(p => p.Status).HasConversion<string>().HasMaxLength(50);
                 e.Property(p => p.Method).HasConversion<string>().HasMaxLength(50);
-            });
-
-            builder.Entity<Pharmacy>(e =>
-            {
-                e.Property(ph => ph.Name).IsRequired().HasMaxLength(200);
-                e.Property(ph => ph.Address).HasMaxLength(500);
-                e.Property(ph => ph.PhoneNumber).HasMaxLength(30);
             });
         }
     }

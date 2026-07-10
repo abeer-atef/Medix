@@ -21,7 +21,7 @@
             item.className = 'pharmacy-card';
 
             item.innerHTML = `
-                <h4>${p.name}</h4>
+                <h4>${p.name} ${p.distanceKm != null ? `<span class="dist-badge">${p.distanceKm.toFixed(1)} km</span>` : ''}</h4>
                 <p>${p.address || 'No address available'}</p>
                 ${p.phoneNumber ? `<a href="tel:${p.phoneNumber}">${p.phoneNumber}</a>` : ''}
                 ${p.openingHours ? `<small>🕐 ${p.openingHours}</small>` : ''}

@@ -1,4 +1,3 @@
-@model Midix.Models.ViewModels.PharmacyIndexViewModel
 @{
     ViewData["Title"] = "Nearby Pharmacies";
 }
@@ -14,29 +13,15 @@
 
 <div class="pharmacy-layout">
     <aside class="pharmacy-sidebar">
-        <input type="text" id="pharmacySearch" class="pharmacy-search" placeholder="Search pharmacies..." value="@Model.SearchTerm" />
+        <input type="text" id="pharmacySearch" class="pharmacy-search" placeholder="Search pharmacies..." />
 
         <button type="button" id="detectLocationBtn" class="pharmacy-detect-btn">
             <span>&#8853;</span> Detect My Location
         </button>
 
-        @* Server-rendered fallback shown before JS replaces it with a distance-sorted list *@
+        @* Populated entirely by pharmacy-page.js via the Overpass API *@
         <div id="pharmacyList">
-            @foreach (var p in Model.Pharmacies)
-            {
-                <div class="pharmacy-card" data-id="@p.Id">
-                    <div class="pharmacy-card-body">
-                        <h4>@p.Name</h4>
-                        <p class="pharmacy-address">@p.Address</p>
-                        <div class="pharmacy-meta">
-                            @if (!string.IsNullOrWhiteSpace(p.PhoneNumber))
-                            {
-                                <a href="tel:@p.PhoneNumber" class="pharmacy-phone">@p.PhoneNumber</a>
-                            }
-                        </div>
-                    </div>
-                </div>
-            }
+            <p class="pharmacy-empty">Detecting your location to find nearby pharmacies...</p>
         </div>
     </aside>
 

@@ -32,8 +32,21 @@ function getUserLocation() {
     });
 }
 
+function haversineKm(lat1, lng1, lat2, lng2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(lat1 * Math.PI / 180) *
+        Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLng / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
 // 🟢 OSM Overpass API (NO BACKEND)
-async function fetchNearbyPharmacies({ lat, lng, radius = 3000 } = {}) {
+
+async function fetchNearbyPharmacies({ lat, lng, radius = 30000 } = {}) {
     if (!lat || !lng) return [];
 
     const query = `
@@ -50,33 +63,42 @@ async function fetchNearbyPharmacies({ lat, lng, radius = 3000 } = {}) {
     const res = await fetch(url);
     const data = await res.json();
 
-    return (data.elements || []).map(el => ({
-        id: el.id,
+    const pharmacies = (data.elements || []).map(el => {
+        const latitude = el.lat ?? el.center?.lat;
+        const longitude = el.lon ?? el.center?.lon;
 
-        // 🟢 FIXED NAME LOGIC
-        name:
-            el.tags?.name ||
-            el.tags?.["name:en"] ||
-            el.tags?.["name:ar"] ||
-            "Pharmacy",
+        return {
+            id: el.id,
 
-        latitude: el.lat ?? el.center?.lat,
-        longitude: el.lon ?? el.center?.lon,
+            // 🟢 FIXED NAME LOGIC
+            name:
+                el.tags?.name ||
+                el.tags?.["name:en"] ||
+                el.tags?.["name:ar"] ||
+                "Pharmacy",
 
-        address:
-            el.tags?.["addr:street"] ||
-            el.tags?.["addr:full"] ||
-            el.tags?.["addr:city"] ||
-            "",
+            latitude,
+            longitude,
+            distanceKm: haversineKm(lat, lng, latitude, longitude),
 
-        phoneNumber:
-            el.tags?.phone ||
-            el.tags?.["contact:phone"] ||
-            "",
+            address:
+                el.tags?.["addr:street"] ||
+                el.tags?.["addr:full"] ||
+                el.tags?.["addr:city"] ||
+                "",
 
-        openingHours:
-            el.tags?.["opening_hours"] || ""
-    }));
+            phoneNumber:
+                el.tags?.phone ||
+                el.tags?.["contact:phone"] ||
+                "",
+
+            openingHours:
+                el.tags?.["opening_hours"] || ""
+        };
+    });
+
+    // 🟢 Sort nearest → farthest
+    return pharmacies.sort((a, b) => a.distanceKm - b.distanceKm);
 }
 
 // Map init
