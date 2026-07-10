@@ -77,6 +77,7 @@
                     ${p.phoneNumber || ''}
                 `);
 
+
             li.onclick = () => {
                 map.setView([p.latitude, p.longitude], 17);
                 marker.openPopup();

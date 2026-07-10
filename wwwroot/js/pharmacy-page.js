@@ -62,6 +62,7 @@
         }
     }
 
+
     detectBtn.addEventListener('click', async () => {
         detectBtn.disabled = true;
 

@@ -46,7 +46,8 @@ function haversineKm(lat1, lng1, lat2, lng2) {
 
 // 🟢 OSM Overpass API (NO BACKEND)
 
-async function fetchNearbyPharmacies({ lat, lng, radius = 30000 } = {}) {
+
+async function fetchNearbyPharmacies({ lat, lng, radius = 35000 } = {}) {
     if (!lat || !lng) return [];
 
     const query = `

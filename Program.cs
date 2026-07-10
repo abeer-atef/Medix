@@ -133,6 +133,7 @@ namespace Midix
                         roleManager.CreateAsync(new IdentityRole(role)).GetAwaiter().GetResult();
                 }
 
+
                 var adminEmail = "admin@medix.com";
                 if (userManager.FindByEmailAsync(adminEmail).GetAwaiter().GetResult() == null)
                 {

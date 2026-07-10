@@ -4,7 +4,11 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <link rel="stylesheet" href="~/css/pharmacy.css" />
-
+<style>
+    nav {
+        display: none;
+    }
+</style>
 <section class="pharmacy-hero">
     <a class="back-link" asp-controller="Home" asp-action="Index">&larr; Back</a>
     <h1>Nearby Pharmacies</h1>
@@ -27,6 +31,7 @@
 
     <div id="pharmacyMap"></div>
 </div>
+
 
 @section Scripts {
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

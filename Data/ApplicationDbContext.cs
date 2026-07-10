@@ -10,6 +10,7 @@ namespace Midix.Data
             : base(options) { }
 
         // DbSets
+
         public DbSet<Patient> Patients => Set<Patient>();
         public DbSet<Doctor> Doctors => Set<Doctor>();
         public DbSet<Specialization> Specializations => Set<Specialization>();
