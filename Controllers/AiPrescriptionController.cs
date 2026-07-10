@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Midix.Data;
 using Midix.Models;
 using Midix.Enums;
-using Midix.Models.ViewModels;
 using Midix.Services;
 using Midix.ViewModel;
 using Midix.Helpers;
