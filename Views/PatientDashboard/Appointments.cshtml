@@ -138,7 +138,20 @@
                             };
                             var payBadge = a.PaymentStatus == PaymentStatus.Paid ? "badge-paid" : "badge-cash";
                             <tr>
-                                <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar-mini">@a.DoctorInitials</div>@a.DoctorName</div></td>
+                                <td>
+                                    <div style="display:flex;align-items:center;gap:10px;">
+                                        <div class="avatar-mini">@a.DoctorInitials</div>
+                                        <div>
+                                            <div>@a.DoctorName</div>
+                                            @if (!string.IsNullOrWhiteSpace(a.ClinicAddress))
+                                            {
+                                                <div style="font-size:.78rem;color:var(--gray-400);">
+                                                    <i class="fas fa-map-marker-alt"></i> @a.ClinicAddress
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </td>
                                 <td>@a.Specialization</td>
                                 <td>@a.Date.ToString("MMM dd, yyyy — h:mm tt")</td>
                                 <td><span class="badge @payBadge">$@a.Fee.ToString("0")</span></td>
@@ -196,7 +209,20 @@
                             };
                             var payBadge = a.PaymentStatus == PaymentStatus.Paid ? "badge-paid" : "badge-cash";
                             <tr>
-                                <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar-mini">@a.DoctorInitials</div>@a.DoctorName</div></td>
+                                <td>
+                                    <div style="display:flex;align-items:center;gap:10px;">
+                                        <div class="avatar-mini">@a.DoctorInitials</div>
+                                        <div>
+                                            <div>@a.DoctorName</div>
+                                            @if (!string.IsNullOrWhiteSpace(a.ClinicAddress))
+                                            {
+                                                <div style="font-size:.78rem;color:var(--gray-400);">
+                                                    <i class="fas fa-map-marker-alt"></i> @a.ClinicAddress
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </td>
                                 <td>@a.Specialization</td>
                                 <td>@a.Date.ToString("MMM dd, yyyy — h:mm tt")</td>
                                 <td><span class="badge @payBadge">$@a.Fee.ToString("0")</span></td>

@@ -51,6 +51,7 @@ namespace Midix.Repository.PatientRepositories
                 DoctorName = $"Dr. {fn} {ln}".Trim(),
                 DoctorInitials = UserHelper.BuildInitials(fn, ln),
                 Specialization = a.Doctor?.Specialization?.Name ?? "",
+                ClinicAddress = a.Doctor?.ClinicAddress ?? "",
                 Date = a.Date,
                 State = a.State,
                 PaymentStatus = a.Payment?.Status ?? PaymentStatus.Pending,

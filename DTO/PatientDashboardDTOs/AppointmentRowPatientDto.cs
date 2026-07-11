@@ -8,6 +8,7 @@ namespace Midix.DTO.PatientDashboardDTOs
         public string DoctorName { get; set; } = string.Empty;
         public string DoctorInitials { get; set; } = string.Empty;
         public string Specialization { get; set; } = string.Empty;
+        public string ClinicAddress { get; set; } = string.Empty;
         public DateTime Date { get; set; }
         public AppointmentType AppointmentType { get; set; }
         public AppointmentState State { get; set; }

@@ -1,50 +1,129 @@
 @model Midix.ViewModel.BookAppointmentViewModel
 
 @{
-    ViewData["Title"]     = "Select Date & Time";
+    ViewData["Title"] = "Select Date & Time";
     ViewData["ActiveTab"] = "book";
 }
 
 @section Styles {
-<style>
-    body { background: var(--gray-50); }
+    <style>
+        body {
+            background: var(--gray-50);
+        }
 
         #navbar {
             display: none;
         }
-    .sidebar-link.logout-btn {
-        width: 100%; background: none; border: none; cursor: pointer; text-align: left;
-        display: flex; align-items: center; gap: 10px; padding: 10px 14px;
-        border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; color: var(--gray-600);
-        transition: var(--transition);
-    }
-    .sidebar-link.logout-btn:hover { background: #fff0f0; color: #e53e3e; }
 
-    .booking-card { max-width: 640px; background: #fff; border-radius: var(--radius);
-                    box-shadow: var(--shadow-sm); padding: 2rem; }
-    .doc-summary { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;
-                   padding-bottom: 1.25rem; border-bottom: 1px solid var(--gray-100); }
-    .doc-summary .doc-avatar {
-        width: 56px; height: 56px; border-radius: 50%;
-        background: var(--blue-light); color: var(--blue); font-weight: 700;
-        display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
-    }
-    .form-label { display: block; font-size: .8rem; font-weight: 700; color: var(--gray-600);
-                  text-transform: uppercase; letter-spacing: .05em; margin-bottom: .5rem; }
-    input[type="date"] {
-        padding: .6rem .9rem; border: 1.5px solid var(--gray-200); border-radius: var(--radius-sm);
-        font-size: .9rem; width: 100%; box-sizing: border-box; margin-bottom: 1.5rem;
-    }
-    .slots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px,1fr)); gap: .6rem; }
-    .slot-btn {
-        padding: .6rem; border: 1.5px solid var(--gray-200); border-radius: var(--radius-sm);
-        background: #fff; font-size: .85rem; font-weight: 600; color: var(--gray-700);
-        text-align: center; text-decoration: none; transition: .15s;
-    }
-    .slot-btn:hover { border-color: var(--blue); color: var(--blue); }
-    .slot-btn.booked { background: var(--gray-100); color: var(--gray-400); pointer-events: none; text-decoration: line-through; }
-    #slotsMsg { color: var(--gray-400); font-size: .875rem; padding: 1rem 0; }
-</style>
+        .sidebar-link.logout-btn {
+            width: 100%;
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--gray-600);
+            transition: var(--transition);
+        }
+
+            .sidebar-link.logout-btn:hover {
+                background: #fff0f0;
+                color: #e53e3e;
+            }
+
+        .booking-card {
+            max-width: 640px;
+            background: #fff;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 2rem;
+        }
+
+        .doc-summary {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+            .doc-summary .doc-avatar {
+                width: 56px;
+                height: 56px;
+                border-radius: 50%;
+                background: var(--blue-light);
+                color: var(--blue);
+                font-weight: 700;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.1rem;
+            }
+
+        .form-label {
+            display: block;
+            font-size: .8rem;
+            font-weight: 700;
+            color: var(--gray-600);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            margin-bottom: .5rem;
+        }
+
+        input[type="date"] {
+            padding: .6rem .9rem;
+            border: 1.5px solid var(--gray-200);
+            border-radius: var(--radius-sm);
+            font-size: .9rem;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 1.5rem;
+        }
+
+        .slots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px,1fr));
+            gap: .6rem;
+        }
+
+        .slot-btn {
+            padding: .6rem;
+            border: 1.5px solid var(--gray-200);
+            border-radius: var(--radius-sm);
+            background: #fff;
+            font-size: .85rem;
+            font-weight: 600;
+            color: var(--gray-700);
+            text-align: center;
+            text-decoration: none;
+            transition: .15s;
+        }
+
+            .slot-btn:hover {
+                border-color: var(--blue);
+                color: var(--blue);
+            }
+
+            .slot-btn.booked {
+                background: var(--gray-100);
+                color: var(--gray-400);
+                pointer-events: none;
+                text-decoration: line-through;
+            }
+
+        #slotsMsg {
+            color: var(--gray-400);
+            font-size: .875rem;
+            padding: 1rem 0;
+        }
+    </style>
 }
 
 <div class="dashboard-layout">
@@ -69,6 +148,12 @@
                 <div>
                     <div style="font-weight:700;color:var(--gray-900);">@Model.SelectedDoctorName</div>
                     <div style="font-size:.85rem;color:var(--gray-500);">@Model.SelectedSpec · $@Model.SelectedFee.ToString("0")</div>
+                    @if (!string.IsNullOrWhiteSpace(Model.SelectedClinicAddress))
+                    {
+                        <div style="font-size:.8rem;color:var(--gray-400);margin-top:2px;">
+                            <i class="fas fa-map-marker-alt"></i> @Model.SelectedClinicAddress
+                        </div>
+                    }
                 </div>
             </div>
 

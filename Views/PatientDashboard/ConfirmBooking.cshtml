@@ -2,49 +2,117 @@
 @using Midix.Models
 
 @{
-    ViewData["Title"]     = "Confirm Booking";
+    ViewData["Title"] = "Confirm Booking";
     ViewData["ActiveTab"] = "book";
     DateTime.TryParse($"{Model.SelectedDate} {Model.SelectedTime}", out var apptDateTime);
 }
 
 @section Styles {
-<style>
-    body { background: var(--gray-50); }
+    <style>
+        body {
+            background: var(--gray-50);
+        }
 
         #navbar {
             display: none;
         }
-    .sidebar-link.logout-btn {
-        width: 100%; background: none; border: none; cursor: pointer; text-align: left;
-        display: flex; align-items: center; gap: 10px; padding: 10px 14px;
-        border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; color: var(--gray-600);
-        transition: var(--transition);
-    }
-    .sidebar-link.logout-btn:hover { background: #fff0f0; color: #e53e3e; }
 
-    .booking-card { max-width: 640px; background: #fff; border-radius: var(--radius);
-                    box-shadow: var(--shadow-sm); padding: 2rem; }
+        .sidebar-link.logout-btn {
+            width: 100%;
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--gray-600);
+            transition: var(--transition);
+        }
 
-    .summary-row {
-        display: flex; justify-content: space-between; padding: .75rem 0;
-        border-bottom: 1px solid var(--gray-100); font-size: .9rem;
-    }
-    .summary-row:last-child { border-bottom: none; }
-    .summary-row span:first-child { color: var(--gray-500); }
-    .summary-row span:last-child  { font-weight: 600; color: var(--gray-900); }
+            .sidebar-link.logout-btn:hover {
+                background: #fff0f0;
+                color: #e53e3e;
+            }
 
-    .pay-options { display: flex; gap: .75rem; margin: 1.5rem 0; flex-wrap: wrap; }
-    .pay-option {
-        flex: 1; min-width: 130px; border: 1.5px solid var(--gray-200); border-radius: var(--radius-sm);
-        padding: .9rem; text-align: center; cursor: pointer; transition: .15s;
-    }
-    .pay-option input { display: none; }
-    .pay-option i { font-size: 1.4rem; color: var(--gray-400); margin-bottom: .4rem; display: block; }
-    .pay-option span { font-size: .85rem; font-weight: 600; color: var(--gray-600); }
-    .pay-option:has(input:checked) { border-color: var(--blue); background: var(--blue-light); }
-    .pay-option:has(input:checked) i,
-    .pay-option:has(input:checked) span { color: var(--blue); }
-</style>
+        .booking-card {
+            max-width: 640px;
+            background: #fff;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 2rem;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: .75rem 0;
+            border-bottom: 1px solid var(--gray-100);
+            font-size: .9rem;
+        }
+
+            .summary-row:last-child {
+                border-bottom: none;
+            }
+
+            .summary-row span:first-child {
+                color: var(--gray-500);
+            }
+
+            .summary-row span:last-child {
+                font-weight: 600;
+                color: var(--gray-900);
+            }
+
+        .pay-options {
+            display: flex;
+            gap: .75rem;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+
+        .pay-option {
+            flex: 1;
+            min-width: 130px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: var(--radius-sm);
+            padding: .9rem;
+            text-align: center;
+            cursor: pointer;
+            transition: .15s;
+        }
+
+            .pay-option input {
+                display: none;
+            }
+
+            .pay-option i {
+                font-size: 1.4rem;
+                color: var(--gray-400);
+                margin-bottom: .4rem;
+                display: block;
+            }
+
+            .pay-option span {
+                font-size: .85rem;
+                font-weight: 600;
+                color: var(--gray-600);
+            }
+
+            .pay-option:has(input:checked) {
+                border-color: var(--blue);
+                background: var(--blue-light);
+            }
+
+                .pay-option:has(input:checked) i,
+                .pay-option:has(input:checked) span {
+                    color: var(--blue);
+                }
+    </style>
 }
 
 <div class="dashboard-layout">
@@ -69,6 +137,10 @@
 
             <div class="summary-row"><span>Doctor</span><span>@Model.SelectedDoctorName</span></div>
             <div class="summary-row"><span>Specialty</span><span>@Model.SelectedSpec</span></div>
+            @if (!string.IsNullOrWhiteSpace(Model.SelectedClinicAddress))
+            {
+                <div class="summary-row"><span>Clinic Address</span><span>@Model.SelectedClinicAddress</span></div>
+            }
             <div class="summary-row"><span>Date &amp; Time</span><span>@apptDateTime.ToString("dddd, MMM d, yyyy — h:mm tt")</span></div>
             <div class="summary-row"><span>Visit Type</span><span>@(Model.SelectedAppointmentType == "FollowUp" ? "Follow-Up (إعادة)" : "New Visit (كشف)")</span></div>
             <div class="summary-row"><span>Fee</span><span id="displayedFee">$@Model.SelectedFee.ToString("0.00")</span></div>

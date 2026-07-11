@@ -93,6 +93,7 @@ namespace Midix.Controllers
             vm.SelectedDoctorId = doctor.UserId;
             vm.SelectedDoctorName = doctor.FullName;
             vm.SelectedSpec = doctor.Specialization;
+            vm.SelectedClinicAddress = doctor.ClinicAddress;
             vm.SelectedFee = doctor.ConsultationFee;
             vm.SelectedDate = string.IsNullOrEmpty(date) ? DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-dd") : date;
 
@@ -140,6 +141,7 @@ namespace Midix.Controllers
             vm.SelectedDoctorId = doctor.UserId;
             vm.SelectedDoctorName = doctor.FullName;
             vm.SelectedSpec = doctor.Specialization;
+            vm.SelectedClinicAddress = doctor.ClinicAddress;
             vm.SelectedAppointmentType = appointmentType;
             vm.SelectedFee = appointmentType == "FollowUp"
                                              ? (doctor.FollowUpFee > 0 ? doctor.FollowUpFee : doctor.ConsultationFee)
@@ -153,8 +155,8 @@ namespace Midix.Controllers
         // ── Final submit (stripe) ──────────────────────────────────────────────────────
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> BookAppointmentConfirm( string doctorId, string appointmentDate, string appointmentTime,
-             string paymentMethod, string appointmentType)   
+        public async Task<IActionResult> BookAppointmentConfirm(string doctorId, string appointmentDate, string appointmentTime,
+             string paymentMethod, string appointmentType)
         {
 
             var pid = await _GetPatientId();

@@ -9,9 +9,9 @@ namespace Midix.ViewModel
     public class PatientHeaderInfo
     {
         public string FirstName { get; set; } = string.Empty;
-        public string LastName  { get; set; } = string.Empty;
-        public string Initials  { get; set; } = string.Empty;
-        public string Email     { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string Initials { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
         public string? PictureUrl { get; set; }
 
     }
@@ -19,13 +19,13 @@ namespace Midix.ViewModel
     // Overview (Index) 
     public class PatientOverviewViewModel : PatientHeaderInfo
     {
-        public int UpcomingAppointmentsCount  { get; set; }
+        public int UpcomingAppointmentsCount { get; set; }
         public int TotalPrescriptionsCount { get; set; }
-        public int PastVisitsCount            { get; set; }
-        public int MedicationsDueCount        { get; set; }
+        public int PastVisitsCount { get; set; }
+        public int MedicationsDueCount { get; set; }
 
-        public List<AppointmentRowPatientDto>    UpcomingAppointments  { get; set; } = new();
-        public List<PrescriptionSummaryDto>      RecentPrescriptions   { get; set; } = new();
+        public List<AppointmentRowPatientDto> UpcomingAppointments { get; set; } = new();
+        public List<PrescriptionSummaryDto> RecentPrescriptions { get; set; } = new();
     }
 
     // Book Appointment 
@@ -34,27 +34,28 @@ namespace Midix.ViewModel
         public List<DoctorCardDto> AvailableDoctors { get; set; } = new();
 
         // Repopulated on step-2 GET
-        public string? SelectedDoctorId   { get; set; }
+        public string? SelectedDoctorId { get; set; }
         public string? SelectedDoctorName { get; set; }
-        public string? SelectedSpec       { get; set; }
+        public string? SelectedSpec { get; set; }
+        public string? SelectedClinicAddress { get; set; }
         public string SelectedAppointmentType { get; set; } = "NewVisit";
-        public decimal SelectedFee        { get; set; }
+        public decimal SelectedFee { get; set; }
         public decimal SelectedFollowUpFee { get; set; }
-        public string? SelectedDate       { get; set; }
+        public string? SelectedDate { get; set; }
 
         // Repopulated on step-3 GET
-        public string? SelectedTime       { get; set; }
+        public string? SelectedTime { get; set; }
     }
 
     // My Appointments 
     public class PatientAppointmentsViewModel : PatientHeaderInfo
     {
         public List<AppointmentRowPatientDto> Upcoming { get; set; } = new();
-        public List<AppointmentRowPatientDto> Past     { get; set; } = new();
+        public List<AppointmentRowPatientDto> Past { get; set; } = new();
 
         // Pagination (shared pageSize for both tabs)
         public PaginationInfo UpcomingPagination { get; set; } = new();
-        public PaginationInfo PastPagination     { get; set; } = new();
+        public PaginationInfo PastPagination { get; set; } = new();
     }
 
     // Prescriptions 
