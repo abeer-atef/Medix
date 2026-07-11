@@ -204,8 +204,10 @@
                         <div class="doc-rating">
                             @if (d.RatingCount > 0)
                             {
-                                <i class="fas fa-star"></i>
-                                @d.AverageRating @d.RatingCount
+                                <div class="rating-display">
+                                    <span class="star-icon"><i class="fas fa-star"></i></span>
+                                    <span class="rating-values">@d.AverageRating (@d.RatingCount)</span>
+                                </div>
                             }
                             else
                             {
